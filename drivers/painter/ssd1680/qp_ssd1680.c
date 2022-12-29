@@ -30,10 +30,14 @@ bool qp_ssd1680_init(painter_device_t device, painter_rotation_t rotation) {
         SSD1680_SOFT_RESET,           120, 1, 0x14,
         SSD1680_DATA_ENTRY_MODE,        0, 1, 0x03,
         SSD1680_BORDER_CONTROL,         0, 1, 0x05,
+        SSD1680_DISPLAY_UPDATE_CONTROL, 0, 2, 0x00, 0x80,
+        SSD1680_TEMP_SENSOR,            0, 1, 0x80,
         SSD1680_VCOM_VOLTAGE,           0, 1, 0x36,
         SSD1680_GATE_VOLTAGE,           0, 1, 0x17,
         SSD1680_SOURCE_VOLTAGE,         0, 3, 0x41, 0x00, 0x32,
+        SSD1680_RAM_X_SIZE,             0, 2, 0x00, (driver->base.panel_width) & 0xFF,
         SSD1680_RAM_X_COUNTER,          0, 1, 0x01,
+        SSD1680_RAM_Y_SIZE,             0, 4, 0x00, 0x00, 0x00, (driver->base.panel_height) & 0xFF, (driver->base.panel_height >> 8) & 0xFF
         SSD1680_RAM_Y_COUNTER,          0, 2, 0x00, 0x00,
         SSD1680_RESOLUTION,             0, 3, (driver->base.panel_width-1) & 0xFF, ((driver->base.panel_width-1) >> 8) & 0xFF, 0x00,
         SSD1680_UPDATE_MODE,            0, 1, 0xF4
