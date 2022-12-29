@@ -38,7 +38,7 @@ bool qp_ssd1680_init(painter_device_t device, painter_rotation_t rotation) {
         SSD1680_RAM_X_SIZE,             0, 2, 0x00, (driver->base.panel_height/8 - 1) & 0xFF,
         SSD1680_RAM_X_COUNTER,          0, 1, 0x01,
         SSD1680_RAM_Y_SIZE,             0, 4, (driver->base.panel_width-1) & 0xFF, ((driver->base.panel_width-1) >> 8) & 0xFF, 0x00, 0x00,
-        SSD1680_RAM_Y_COUNTER,          0, 2, (driver->base.panel_width-1) & 0xFF, ((driver->base.panel_width-1) >> 8),
+        SSD1680_RAM_Y_COUNTER,          0, 2, (driver->base.panel_width-1) & 0xFF, ((driver->base.panel_width-1) >> 8) & 0xFF,
         SSD1680_RESOLUTION,             0, 3, (driver->base.panel_width-1) & 0xFF, ((driver->base.panel_width-1) >> 8) & 0xFF, 0x00,
         SSD1680_UPDATE_MODE,            0, 1, 0xF4
     };
