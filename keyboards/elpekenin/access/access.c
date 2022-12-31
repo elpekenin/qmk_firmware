@@ -10,11 +10,13 @@
 #    include "qp.h"
 #    include "qp_eink_panel.h"
 #    include "qp_surface.h"
+painter_device_t il91874;
 painter_device_t ili9163;
 painter_device_t ili9341;
 painter_device_t ili9486;
-painter_device_t il91874;
+painter_device_t ssd1680;
 uint8_t il91874_buffer[EINK_BYTES_REQD(IL91874_WIDTH, IL91874_HEIGHT)] = {0};
+uint8_t ssd1680_buffer[EINK_BYTES_REQD(SSD1680_WIDTH, SSD1680_HEIGHT)] = {0};
 #endif // QUANTUM_PAINTER_ENABLE
 
 #if defined(ONE_HAND_ENABLE)
@@ -69,8 +71,15 @@ uint32_t deferred_init(uint32_t trigger_time, void *cb_arg) {
     // qp_init(ili9486, ILI9486_ROTATION);
 
     // Don't draw on eink, as it has a timeout
-    il91874 = qp_il91874_make_spi_device(_IL91874_WIDTH, _IL91874_HEIGHT, IL91874_CS_PIN, SPI_DC_PIN, IL91874_RST_PIN, SPI_DIV, SPI_MODE, (void *) il91874_buffer);
-    qp_init(il91874, IL91874_ROTATION);
+    // il91874 = qp_il91874_make_spi_device(_IL91874_WIDTH, _IL91874_HEIGHT, IL91874_CS_PIN, SPI_DC_PIN, IL91874_RST_PIN, SPI_DIV, SPI_MODE, (void *) il91874_buffer);
+    // qp_init(il91874, IL91874_ROTATION);
+
+    ssd1680 = qp_ssd1680_make_spi_device(_SSD1680_WIDTH, _SSD1680_HEIGHT, SSD1680_CS_PIN, SPI_DC_PIN, SSD1680_RST_PIN, SPI_DIV, SPI_MODE, (void *) ssd1680_buffer);
+    qp_init(ssd1680, SSD1680_ROTATION);
+
+    qp_rect(ssd1680,  0,  0, 10, 10,   HSV_RED, false);
+    qp_rect(ssd1680, 15, 15, 25, 25, HSV_BLACK, false);
+    qp_flush(ssd1680);
 
     // Fill them black
     // qp_rect(ili9163, 0, 0, ILI9163_WIDTH, ILI9163_HEIGHT, HSV_BLACK, true);

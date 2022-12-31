@@ -16,7 +16,7 @@
 // Painter
 #define QUANTUM_PAINTER_NUM_IMAGES 16
 #define SURFACE_NUM_DEVICES 2
-#define QUANTUM_PAINTER_NUM_DISPLAYS 4
+#define QUANTUM_PAINTER_NUM_DISPLAYS 4 // <- Used for custom QP over XAP
 #define QUANTUM_PAINTER_PIXDATA_BUFFER_SIZE 65536
 
 
@@ -55,6 +55,10 @@
 #define IL91874_CS_PIN GP18
 #define IL91874_RST_PIN GP1
 
+#define SSD1680_ROTATION 0
+#define SSD1680_CS_PIN GP18
+#define SSD1680_RST_PIN GP1
+
 // =======
 // RGB
 #define ENABLE_RGB_MATRIX_CYCLE_LEFT_RIGHT
@@ -85,10 +89,8 @@
 #define AUDIO_ENABLE_TONE_MULTIPLEXING
 #define AUDIO_TONE_MULTIPLEXING_RATE_DEFAULT 10
 #define AUDIO_INIT_DELAY 0
-#if defined(AUDIO_ENABLE)
-#    define STARTUP_SONG SONG(ONE_UP_SOUND)
-#    define GOODBYE_SONG SONG(COIN_SOUND)
-#endif // AUDIO_ENABLE
+#define STARTUP_SONG SONG(ONE_UP_SOUND)
+#define GOODBYE_SONG SONG(COIN_SOUND)
 
 // ==================================================================================================
 // SOME MAGIC DOWN HERE
@@ -101,6 +103,8 @@
 #define _ILI9486_HEIGHT 480
 #define _IL91874_WIDTH 176
 #define _IL91874_HEIGHT 264
+#define _SSD1680_WIDTH 250
+#define _SSD1680_HEIGHT 122
 
 // - Check rotation
 #if !(ILI9163_ROTATION == 0 || ILI9163_ROTATION == 1 || ILI9163_ROTATION == 2 || ILI9163_ROTATION == 3)
@@ -114,6 +118,9 @@
 #endif
 #if !(IL91874_ROTATION == 0 || IL91874_ROTATION == 1 || IL91874_ROTATION == 2 || IL91874_ROTATION == 3)
 #    error IL91874_ROTATION has to be within 0-3 (both included)
+#endif
+#if !(SSD1680_ROTATION == 0 || SSD1680_ROTATION == 1 || SSD1680_ROTATION == 2 || SSD1680_ROTATION == 3)
+#    error SSD1680_ROTATION has to be within 0-3 (both included)
 #endif
 
 // - Virtual size, used for drawing funcs
@@ -147,6 +154,14 @@
 #else
 #    define IL91874_WIDTH  _IL91874_HEIGHT
 #    define IL91874_HEIGHT _IL91874_WIDTH
+#endif
+
+#if (SSD1680_ROTATION % 2 == 0)
+#    define SSD1680_WIDTH  _SSD1680_WIDTH
+#    define SSD1680_HEIGHT _SSD1680_HEIGHT
+#else
+#    define SSD1680_WIDTH  _SSD1680_HEIGHT
+#    define SSD1680_HEIGHT _SSD1680_WIDTH
 #endif
 
 // - Default values
