@@ -65,6 +65,7 @@ include $(QUANTUM_PATH)/encoder/tests/rules.mk
 include $(QUANTUM_PATH)/os_detection/tests/rules.mk
 include $(QUANTUM_PATH)/sequencer/tests/rules.mk
 include $(QUANTUM_PATH)/wear_leveling/tests/rules.mk
+include $(QUANTUM_PATH)/xap/tests/rules.mk
 include $(QUANTUM_PATH)/logging/print.mk
 include $(PLATFORM_PATH)/test/rules.mk
 ifneq ($(filter $(FULL_TESTS),$(TEST)),)
