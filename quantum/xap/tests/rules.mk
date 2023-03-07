@@ -15,15 +15,30 @@ $(shell qmk compile -c -kb $(KEYBOARD) -km $(KEYMAP) > /dev/null 2>&1)
 # todo: dynamic path and/or get it from the other mk files
 KEYMAP_OUTPUT = .build/obj_handwired_onekey_rp2040_xap
 
-xap_common_DEFS :=
+# xap imports quantum, which imports ton of stuff, we need those to be defined
+# otherwise compilation just crashes
+xap_common_DEFS := \
+	-DMATRIX_ROWS=1 \
+	-DMATRIX_COLS=1 \
+	-DVENDOR_ID=0xFEED \
+	-DPRODUCT_ID=0x6465 \
+	-DDEVICE_VER=0x0001
+# TODO: Dynamically add all files in the `handlers` folder (?)
 xap_common_SRC := \
-	$(QUANTUM_PATH)/xap/xap.c
+	$(QUANTUM_PATH)/secure.c \
+	$(QUANTUM_PATH)/xap/xap.c \
+	$(QUANTUM_PATH)/xap/handlers/audio.c \
+	$(QUANTUM_PATH)/xap/handlers/core.c \
+	$(QUANTUM_PATH)/xap/handlers/lighting.c \
+	$(QUANTUM_PATH)/xap/handlers/remapping.c \
+	$(QUANTUM_PATH)/xap/tests/xap_mock.cpp
 xap_common_INC := \
+	$(QUANTUM_PATH) \
 	$(QUANTUM_PATH)/xap \
 	$(KEYMAP_OUTPUT)/src
 
 xap_secure_DEFS := \
-	$(xap_common_DEFS)	
+	$(xap_common_DEFS)
 xap_secure_SRC := \
 	$(xap_common_SRC) \
 	$(QUANTUM_PATH)/xap/tests/xap_secure.cpp
