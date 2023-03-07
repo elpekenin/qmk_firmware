@@ -1,2 +1,2 @@
 TEST_LIST += \
-	xap_secure.cpp
+	xap_secure

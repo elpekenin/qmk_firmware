@@ -12,8 +12,20 @@ KEYMAP = xap
 # cant get $(QMK_BIN) to work here for some reason
 $(shell qmk compile -c -kb $(KEYBOARD) -km $(KEYMAP) > /dev/null 2>&1)
 
+# todo: dynamic path and/or get it from the other mk files
+KEYMAP_OUTPUT = .build/obj_handwired_onekey_rp2040_xap
+
 xap_common_DEFS :=
 xap_common_SRC := \
 	$(QUANTUM_PATH)/xap/xap.c
 xap_common_INC := \
-	$(QUANTUM_PATH)/xap
+	$(QUANTUM_PATH)/xap \
+	$(KEYMAP_OUTPUT)/src
+
+xap_secure_DEFS := \
+	$(xap_common_DEFS)	
+xap_secure_SRC := \
+	$(xap_common_SRC) \
+	$(QUANTUM_PATH)/xap/tests/xap_secure.cpp
+xap_secure_INC := \
+	$(xap_common_INC)
