@@ -4,6 +4,7 @@
 #include "quantum.h"
 #include "xap.h"
 #include "hardware_id.h"
+#include "secure.h"
 
 bool xap_respond_get_config_blob_chunk(xap_token_t token, const void *data, size_t length) {
     if (length != sizeof(uint16_t)) {

@@ -5,6 +5,10 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+#ifdef __cplusplus
+#    define _Static_assert static_assert
+#endif
+
 ////////////////////////////////////////////////////////////////////////////////
 // Versions and identifiers
 
@@ -51,7 +55,7 @@ typedef struct {
     {{ member.type | type_to_c(member.name) }};
 {% endfor %}
 } __attribute__((__packed__)) xap_{{ name | to_snake | lower }}_t{{ data.type | type_to_c_after }};
-{# _Static_assert(sizeof(xap_{{ name | to_snake | lower }}_t) == {{ data.struct_length }}, "xap_{{ name | to_snake | lower }}_t needs to be {{ data.struct_length }} bytes in size"); #}
+_Static_assert(sizeof(xap_{{ name | to_snake | lower }}_t) == {{ data.struct_length }}, "xap_{{ name | to_snake | lower }}_t needs to be {{ data.struct_length }} bytes in size");
 {% endif %}
 {% endfor %}
 
@@ -70,7 +74,7 @@ typedef struct {
     {{ member.type | type_to_c(member.name|lower) }};
 {% endfor %}
 } __attribute__((__packed__)) {{ this_prefix_lc | to_snake | lower }}_arg_t;
-{# _Static_assert(sizeof({{ this_prefix_lc | to_snake | lower }}_arg_t) == {{ data.request_struct_length }}, "{{ this_prefix_lc | to_snake | lower }}_arg_t needs to be {{ data.request_struct_length }} bytes in size"); #}
+_Static_assert(sizeof({{ this_prefix_lc | to_snake | lower }}_arg_t) == {{ data.request_struct_length }}, "{{ this_prefix_lc | to_snake | lower }}_arg_t needs to be {{ data.request_struct_length }} bytes in size");
 {% elif 'request_type' in data %}
 typedef {{ data.request_type | type_to_c(this_prefix_lc+'_arg_t') }};
 {% endif %}
@@ -81,7 +85,7 @@ typedef struct {
     {{ member.type | type_to_c(member.name|lower) }};
 {% endfor %}
 } __attribute__((__packed__)) {{ this_prefix_lc | to_snake | lower }}_t;
-{# _Static_assert(sizeof({{ this_prefix_lc | to_snake | lower }}_t) == {{ data.return_struct_length }}, "{{ this_prefix_lc | to_snake | lower }}_t needs to be {{ data.return_struct_length }} bytes in size"); #}
+_Static_assert(sizeof({{ this_prefix_lc | to_snake | lower }}_t) == {{ data.return_struct_length }}, "{{ this_prefix_lc | to_snake | lower }}_t needs to be {{ data.return_struct_length }} bytes in size");
 {% elif 'return_type' in data %}
 {% if '[' in data.return_type %}
 typedef struct __attribute__((__packed__)) { {{ data.return_type | type_to_c('x') }}; } {{ this_prefix_lc }}_t;

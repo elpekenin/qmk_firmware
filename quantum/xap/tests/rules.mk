@@ -12,7 +12,7 @@ KEYMAP = xap
 # cant get $(QMK_BIN) to work here for some reason
 $(shell qmk compile -c -kb $(KEYBOARD) -km $(KEYMAP) > /dev/null 2>&1)
 
-# todo: dynamic path and/or get it from the other mk files
+# TODO: dynamic path and/or get it from the other mk files
 KEYMAP_OUTPUT = .build/obj_handwired_onekey_rp2040_xap
 
 # xap imports quantum, which imports ton of stuff, we need those to be defined
@@ -25,13 +25,13 @@ xap_common_DEFS := \
 	-DDEVICE_VER=0x0001
 # TODO: Dynamically add all files in the `handlers` folder (?)
 xap_common_SRC := \
-	$(QUANTUM_PATH)/secure.c \
+	$(QUANTUM_PATH)/xap/tests/secure_mock.cpp \
+	$(QUANTUM_PATH)/xap/tests/xap_mock.cpp \
 	$(QUANTUM_PATH)/xap/xap.c \
 	$(QUANTUM_PATH)/xap/handlers/audio.c \
 	$(QUANTUM_PATH)/xap/handlers/core.c \
 	$(QUANTUM_PATH)/xap/handlers/lighting.c \
-	$(QUANTUM_PATH)/xap/handlers/remapping.c \
-	$(QUANTUM_PATH)/xap/tests/xap_mock.cpp
+	$(QUANTUM_PATH)/xap/handlers/remapping.c
 xap_common_INC := \
 	$(QUANTUM_PATH) \
 	$(QUANTUM_PATH)/xap \
