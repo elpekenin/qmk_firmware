@@ -191,8 +191,6 @@ void raw_hid_task(void) {
 static uint8_t xap_output_buffer[XAP_BUFFER_SIZE];
 static uint8_t xap_output_received_bytes = 0;
 
-extern void xap_receive(xap_token_t token, const uint8_t *data, size_t length);
-
 void xap_send_base(uint8_t *data, uint8_t length) {
     if (length != XAP_BUFFER_SIZE) {
         return;

@@ -100,39 +100,42 @@ bool xap_pre_execute_route(xap_token_t token, const xap_route_t *route) {
 #ifdef SECURE_ENABLE
     if (!secure_is_unlocked() && (route->flags.secure == ROUTE_PERMISSIONS_SECURE)) {
         xap_respond_failure(token, XAP_RESPONSE_FLAG_SECURE_FAILURE);
-        return true;
+        return false;
     }
 
     // TODO: XAP messages extend unlocked timeout?
     secure_activity_event();
 #endif
-    return false;
+    return true;
 }
 
-void xap_execute_route(xap_token_t token, const xap_route_t *routes, size_t max_routes, const uint8_t *data, size_t data_len) {
-    if (data_len == 0) return;
+bool xap_execute_route(xap_token_t token, const xap_route_t *routes, size_t max_routes, const uint8_t *data, size_t data_len) {
+    if (data_len == 0)
+        return false;
+
     xap_identifier_t id = data[0];
 
     if (id < max_routes) {
         xap_route_t route;
         memcpy_P(&route, &routes[id], sizeof(xap_route_t));
 
-        if (xap_pre_execute_route(token, &route)) {
-            return;
+        if (!xap_pre_execute_route(token, &route)) {
+            return false;
         }
 
         switch (route.flags.type) {
             case XAP_ROUTE:
                 if (route.child_routes != NULL && route.child_routes_len > 0 && data_len > 0) {
                     xap_execute_route(token, route.child_routes, route.child_routes_len, &data[1], data_len - 1);
-                    return;
+                    return true;
                 }
                 break;
 
             case XAP_EXECUTE:
                 if (route.handler != NULL) {
                     bool ok = (route.handler)(token, data_len == 1 ? NULL : &data[1], data_len - 1);
-                    if (ok) return;
+                    if (ok)
+                        return true;
                 }
                 break;
 
@@ -140,17 +143,17 @@ void xap_execute_route(xap_token_t token, const xap_route_t *routes, size_t max_
                 if (route.u32getter != NULL) {
                     const uint32_t ret = (route.u32getter)();
                     xap_respond_data(token, &ret, sizeof(ret));
-                    return;
+                    return true;
                 }
                 break;
 
             case XAP_VALUE:
                 xap_respond_data(token, route.const_data, route.const_data_len);
-                return;
+                return true;
 
             case XAP_CONST_MEM:
                 xap_respond_data_P(token, route.const_data, route.const_data_len);
-                return;
+                return true;
 
             default:
                 break;
@@ -159,8 +162,10 @@ void xap_execute_route(xap_token_t token, const xap_route_t *routes, size_t max_
 
     // Nothing got handled, so we respond with failure.
     xap_respond_failure(token, XAP_RESPONSE_FLAG_FAILED);
+
+    return false;
 }
 
-void xap_receive(xap_token_t token, const uint8_t *data, size_t length) {
-    xap_execute_route(token, xap_route_table, sizeof(xap_route_table) / sizeof(xap_route_t), data, length);
+bool xap_receive(xap_token_t token, const uint8_t *data, size_t length) {
+    return xap_execute_route(token, xap_route_table, ARRAY_SIZE(xap_route_table), data, length);
 }

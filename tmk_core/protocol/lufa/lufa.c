@@ -190,8 +190,6 @@ static void raw_hid_task(void) {
 #endif
 
 #ifdef XAP_ENABLE
-extern void xap_receive(xap_token_t token, const uint8_t *data, size_t length);
-
 void xap_send_base(uint8_t *data, uint8_t length) {
     // TODO: implement variable size packet
     if (length != XAP_EPSIZE) {
