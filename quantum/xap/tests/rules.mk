@@ -23,15 +23,11 @@ xap_common_DEFS := \
 	-DVENDOR_ID=0xFEED \
 	-DPRODUCT_ID=0x6465 \
 	-DDEVICE_VER=0x0001
-# TODO: Dynamically add all files in the `handlers` folder (?)
 xap_common_SRC := \
 	$(QUANTUM_PATH)/xap/tests/secure_mock.cpp \
 	$(QUANTUM_PATH)/xap/tests/xap_mock.cpp \
 	$(QUANTUM_PATH)/xap/xap.c \
-	$(QUANTUM_PATH)/xap/handlers/audio.c \
-	$(QUANTUM_PATH)/xap/handlers/core.c \
-	$(QUANTUM_PATH)/xap/handlers/lighting.c \
-	$(QUANTUM_PATH)/xap/handlers/remapping.c
+	$(QUANTUM_PATH)/xap/xap_handlers.c
 xap_common_INC := \
 	$(QUANTUM_PATH) \
 	$(QUANTUM_PATH)/xap \

@@ -111,7 +111,7 @@ bool xap_pre_execute_route(xap_token_t token, const xap_route_t *route) {
 
 bool xap_execute_route(xap_token_t token, const xap_route_t *routes, size_t max_routes, const uint8_t *data, size_t data_len) {
     if (data_len == 0)
-        return false;
+        return true;
 
     xap_identifier_t id = data[0];
 
@@ -126,8 +126,9 @@ bool xap_execute_route(xap_token_t token, const xap_route_t *routes, size_t max_
         switch (route.flags.type) {
             case XAP_ROUTE:
                 if (route.child_routes != NULL && route.child_routes_len > 0 && data_len > 0) {
-                    xap_execute_route(token, route.child_routes, route.child_routes_len, &data[1], data_len - 1);
-                    return true;
+                    bool ok = xap_execute_route(token, route.child_routes, route.child_routes_len, &data[1], data_len - 1);
+                    if (ok)
+                        return true;
                 }
                 break;
 
