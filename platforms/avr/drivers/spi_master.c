@@ -36,22 +36,51 @@
 #    define SPI_TIMEOUT 100
 #endif
 
-static pin_t   currentSlavePin    = NO_PIN;
+static pin_t   currentSlavePin;
+static bool    spiStarted = false;
 static uint8_t currentSlaveConfig = 0;
 static bool    currentSlave2X     = false;
 
 void spi_init(void) {
-    writePinHigh(SPI_SS_PIN);
+    mcu_pin_t sck  = 0;
+    bool sck_real  = get_mcu_pin(SPI_SCK_PIN, &sck);
+    mcu_pin_t mosi = 0;
+    bool mosi_real = get_mcu_pin(SPI_MOSI_PIN, &mosi);
+    mcu_pin_t miso = 0;
+    bool miso_real = get_mcu_pin(SPI_MISO_PIN, &miso);
+
+    if (!sck_real) {
+        dprintln("Can't configure SPI with SCK being a virtual pin");
+        return;
+    }
     setPinOutput(SPI_SCK_PIN);
-    setPinOutput(SPI_MOSI_PIN);
-    setPinInput(SPI_MISO_PIN);
+
+    // Dont know what this is...
+    writePinHigh(SPI_SS_PIN);
+
+    if (mosi_real) {
+        setPinOutput(SPI_MOSI_PIN);
+    } else {
+        dprintln("Configuring SPI with a virtual MOSI pin, leading to the signal being lost");
+    }
+    if (miso_real) {
+        setPinInput(SPI_MISO_PIN);
+    } else {
+        dprintln("Configuring SPI with a virtual MISO pin, leading to the signal being lost");
+    }
 
     SPCR = (_BV(SPE) | _BV(MSTR));
+
+    spiStarted = false;
 }
 
 bool spi_start(pin_t slavePin, bool lsbFirst, uint8_t mode, uint16_t divisor) {
-    if (currentSlavePin != NO_PIN || slavePin == NO_PIN) {
+    if (spiStarted) {
         return false;
+    }
+
+    if (slavePin == NO_PIN) {
+        dprintln("Starting SPI without CS pin");
     }
 
     currentSlaveConfig = 0;
@@ -107,6 +136,8 @@ bool spi_start(pin_t slavePin, bool lsbFirst, uint8_t mode, uint16_t divisor) {
     currentSlavePin = slavePin;
     setPinOutput(currentSlavePin);
     writePinLow(currentSlavePin);
+
+    spiStarted = true;
 
     return true;
 }
@@ -168,13 +199,13 @@ spi_status_t spi_receive(uint8_t *data, uint16_t length) {
 }
 
 void spi_stop(void) {
-    if (currentSlavePin != NO_PIN) {
+    if (spiStarted) {
         setPinOutput(currentSlavePin);
         writePinHigh(currentSlavePin);
-        currentSlavePin = NO_PIN;
         SPSR &= ~(_BV(SPI2X));
         SPCR &= ~(currentSlaveConfig);
         currentSlaveConfig = 0;
         currentSlave2X     = false;
+        spiStarted         = false;
     }
 }

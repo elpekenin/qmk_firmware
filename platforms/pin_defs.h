@@ -15,8 +15,11 @@
  */
 #pragma once
 
+#include "pin.h"
+
 // useful for direct pin mapping
-#define NO_PIN (pin_t)(~0)
+static const pin_impl_t pin_NO_PIN = {.type = PIN_NONE, .mcu_pin = 0};
+#define NO_PIN ((pin_t)&pin_NO_PIN)
 
 #if __has_include("_pin_defs.h")
 #    include "_pin_defs.h" /* Include the platforms pin defs */

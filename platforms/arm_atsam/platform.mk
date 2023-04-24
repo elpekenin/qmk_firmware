@@ -15,6 +15,8 @@ BIN =
 COMMON_VPATH += $(LIB_PATH)/arm_atsam/packs/atmel/SAMD51_DFP/1.0.70/include
 COMMON_VPATH += $(LIB_PATH)/arm_atsam/packs/arm/cmsis/5.0.1/CMSIS/Include
 
+PLATFORM_SRC += $(PLATFORM_COMMON_DIR)/platform_pin.c
+
 COMPILEFLAGS += -funsigned-char
 COMPILEFLAGS += -funsigned-bitfields
 COMPILEFLAGS += -ffunction-sections

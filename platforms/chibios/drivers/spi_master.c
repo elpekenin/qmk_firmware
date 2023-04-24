@@ -14,46 +14,75 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include "debug.h"
 #include "spi_master.h"
-
 #include "timer.h"
 
-static pin_t currentSlavePin = NO_PIN;
+static bool spiStarted = false;
+static pin_t currentSlavePin;
 
-#if defined(K20x) || defined(KL2x) || defined(RP2040)
-static SPIConfig spiConfig = {NULL, 0, 0, 0};
-#else
-static SPIConfig spiConfig = {false, NULL, 0, 0, 0, 0};
-#endif
+static SPIConfig spiConfig;
 
 __attribute__((weak)) void spi_init(void) {
     static bool is_initialised = false;
     if (!is_initialised) {
+        mcu_pin_t sck  = 0;
+        bool sck_real  = get_mcu_pin(SPI_SCK_PIN, &sck);
+        mcu_pin_t mosi = 0;
+        bool mosi_real = get_mcu_pin(SPI_MOSI_PIN, &mosi);
+        mcu_pin_t miso = 0;
+        bool miso_real = get_mcu_pin(SPI_MISO_PIN, &miso);
+
+        if (!sck_real) {
+            dprintln("Can't configure SPI with SCK being a virtual pin");
+            return;
+        }
+
         is_initialised = true;
 
         // Try releasing special pins for a short time
         setPinInput(SPI_SCK_PIN);
-        setPinInput(SPI_MOSI_PIN);
-        setPinInput(SPI_MISO_PIN);
-
+        if (mosi_real) {
+            setPinInput(SPI_MOSI_PIN);
+        } else {
+            dprintln("Configuring SPI with a virtual MOSI pin, leading to the signal being lost");
+        }
+        if (miso_real) {
+            setPinInput(SPI_MISO_PIN);
+        } else {
+            dprintln("Configuring SPI with a virtual MISO pin, leading to the signal being lost");
+        }
         chThdSleepMilliseconds(10);
+
 #if defined(USE_GPIOV1)
-        palSetPadMode(PAL_PORT(SPI_SCK_PIN), PAL_PAD(SPI_SCK_PIN), SPI_SCK_PAL_MODE);
-        palSetPadMode(PAL_PORT(SPI_MOSI_PIN), PAL_PAD(SPI_MOSI_PIN), SPI_MOSI_PAL_MODE);
-        palSetPadMode(PAL_PORT(SPI_MISO_PIN), PAL_PAD(SPI_MISO_PIN), SPI_MISO_PAL_MODE);
+        palSetPadMode(PAL_PORT(sck), PAL_PAD(sck), SPI_SCK_PAL_MODE);
+        if (mosi_real) {
+            palSetPadMode(PAL_PORT(mosi), PAL_PAD(mosi), SPI_MOSI_PAL_MODE);
+        }
+        if (miso_real) {
+            palSetPadMode(PAL_PORT(miso), PAL_PAD(miso), SPI_MISO_PAL_MODE);
+        }
 #else
-        palSetPadMode(PAL_PORT(SPI_SCK_PIN), PAL_PAD(SPI_SCK_PIN), SPI_SCK_FLAGS);
-        palSetPadMode(PAL_PORT(SPI_MOSI_PIN), PAL_PAD(SPI_MOSI_PIN), SPI_MOSI_FLAGS);
-        palSetPadMode(PAL_PORT(SPI_MISO_PIN), PAL_PAD(SPI_MISO_PIN), SPI_MISO_FLAGS);
+        palSetPadMode(PAL_PORT(sck), PAL_PAD(sck), SPI_SCK_FLAGS);
+        if (mosi_real) {
+            palSetPadMode(PAL_PORT(mosi), PAL_PAD(mosi), SPI_MOSI_FLAGS);
+        }
+        if (miso_real) {
+            palSetPadMode(PAL_PORT(miso), PAL_PAD(miso), SPI_MISO_FLAGS);
+        }
 #endif
         spiStop(&SPI_DRIVER);
-        currentSlavePin = NO_PIN;
+        spiStarted = false;
     }
 }
 
 bool spi_start(pin_t slavePin, bool lsbFirst, uint8_t mode, uint16_t divisor) {
-    if (currentSlavePin != NO_PIN || slavePin == NO_PIN) {
+    if (spiStarted) {
         return false;
+    }
+
+    if (slavePin == NO_PIN) {
+        dprintln("Starting SPI without CS pin");
     }
 
 #if !(defined(WB32F3G71xx) || defined(WB32FQ95xx))
@@ -247,11 +276,20 @@ bool spi_start(pin_t slavePin, bool lsbFirst, uint8_t mode, uint16_t divisor) {
     }
 #endif
 
-    currentSlavePin  = slavePin;
-    spiConfig.ssport = PAL_PORT(slavePin);
-    spiConfig.sspad  = PAL_PAD(slavePin);
+    spiStarted = true;
 
+    currentSlavePin   = slavePin;
+    mcu_pin_t cs      = 0;
+    bool      cs_real = get_mcu_pin(slavePin, &cs);
+    if (cs_real) {
+        spiConfig.ssport = PAL_PORT(cs);
+        spiConfig.sspad  = PAL_PAD(cs);
+    }
+
+    // Ensure pin is low, as ChibiOS code cant handle virtual ones
     setPinOutput(slavePin);
+    writePinLow(slavePin);
+
     spiStart(&SPI_DRIVER, &spiConfig);
     spiSelect(&SPI_DRIVER);
 
@@ -283,9 +321,12 @@ spi_status_t spi_receive(uint8_t *data, uint16_t length) {
 }
 
 void spi_stop(void) {
-    if (currentSlavePin != NO_PIN) {
+    if (spiStarted) {
+        // Ensure pin is high, as ChibiOS code cant handle virtual ones
+        setPinOutput(currentSlavePin);
+        writePinHigh(currentSlavePin);
         spiUnselect(&SPI_DRIVER);
         spiStop(&SPI_DRIVER);
-        currentSlavePin = NO_PIN;
+        spiStarted = false;
     }
 }

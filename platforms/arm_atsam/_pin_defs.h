@@ -15,70 +15,145 @@
  */
 #pragma once
 
+#include "pin.h"
 #include "samd51j18a.h"
 
-#define A00 PIN_PA00
-#define A01 PIN_PA01
-#define A02 PIN_PA02
-#define A03 PIN_PA03
-#define A04 PIN_PA04
-#define A05 PIN_PA05
-#define A06 PIN_PA06
-#define A07 PIN_PA07
-#define A08 PIN_PA08
-#define A09 PIN_PA09
-#define A10 PIN_PA10
-#define A11 PIN_PA11
-#define A12 PIN_PA12
-#define A13 PIN_PA13
-#define A14 PIN_PA14
-#define A15 PIN_PA15
-#define A16 PIN_PA16
-#define A17 PIN_PA17
-#define A18 PIN_PA18
-#define A19 PIN_PA19
-#define A20 PIN_PA20
-#define A21 PIN_PA21
-#define A22 PIN_PA22
-#define A23 PIN_PA23
-#define A24 PIN_PA24
-#define A25 PIN_PA25
-#define A26 PIN_PA26
-#define A27 PIN_PA27
-#define A28 PIN_PA28
-#define A29 PIN_PA29
-#define A30 PIN_PA30
-#define A31 PIN_PA31
+static const pin_impl_t pin_A00 = {.type = PIN_MCU, .mcu_pin = PIN_PA00};
+static const pin_impl_t pin_A01 = {.type = PIN_MCU, .mcu_pin = PIN_PA01};
+static const pin_impl_t pin_A02 = {.type = PIN_MCU, .mcu_pin = PIN_PA02};
+static const pin_impl_t pin_A03 = {.type = PIN_MCU, .mcu_pin = PIN_PA03};
+static const pin_impl_t pin_A04 = {.type = PIN_MCU, .mcu_pin = PIN_PA04};
+static const pin_impl_t pin_A05 = {.type = PIN_MCU, .mcu_pin = PIN_PA05};
+static const pin_impl_t pin_A06 = {.type = PIN_MCU, .mcu_pin = PIN_PA06};
+static const pin_impl_t pin_A07 = {.type = PIN_MCU, .mcu_pin = PIN_PA07};
+static const pin_impl_t pin_A08 = {.type = PIN_MCU, .mcu_pin = PIN_PA08};
+static const pin_impl_t pin_A09 = {.type = PIN_MCU, .mcu_pin = PIN_PA09};
+static const pin_impl_t pin_A10 = {.type = PIN_MCU, .mcu_pin = PIN_PA10};
+static const pin_impl_t pin_A11 = {.type = PIN_MCU, .mcu_pin = PIN_PA11};
+static const pin_impl_t pin_A12 = {.type = PIN_MCU, .mcu_pin = PIN_PA12};
+static const pin_impl_t pin_A13 = {.type = PIN_MCU, .mcu_pin = PIN_PA13};
+static const pin_impl_t pin_A14 = {.type = PIN_MCU, .mcu_pin = PIN_PA14};
+static const pin_impl_t pin_A15 = {.type = PIN_MCU, .mcu_pin = PIN_PA15};
+static const pin_impl_t pin_A16 = {.type = PIN_MCU, .mcu_pin = PIN_PA16};
+static const pin_impl_t pin_A17 = {.type = PIN_MCU, .mcu_pin = PIN_PA17};
+static const pin_impl_t pin_A18 = {.type = PIN_MCU, .mcu_pin = PIN_PA18};
+static const pin_impl_t pin_A19 = {.type = PIN_MCU, .mcu_pin = PIN_PA19};
+static const pin_impl_t pin_A20 = {.type = PIN_MCU, .mcu_pin = PIN_PA20};
+static const pin_impl_t pin_A21 = {.type = PIN_MCU, .mcu_pin = PIN_PA21};
+static const pin_impl_t pin_A22 = {.type = PIN_MCU, .mcu_pin = PIN_PA22};
+static const pin_impl_t pin_A23 = {.type = PIN_MCU, .mcu_pin = PIN_PA23};
+static const pin_impl_t pin_A24 = {.type = PIN_MCU, .mcu_pin = PIN_PA24};
+static const pin_impl_t pin_A25 = {.type = PIN_MCU, .mcu_pin = PIN_PA25};
+static const pin_impl_t pin_A27 = {.type = PIN_MCU, .mcu_pin = PIN_PA27};
+static const pin_impl_t pin_A30 = {.type = PIN_MCU, .mcu_pin = PIN_PA30};
+static const pin_impl_t pin_A31 = {.type = PIN_MCU, .mcu_pin = PIN_PA31};
 
-#define B00 PIN_PB00
-#define B01 PIN_PB01
-#define B02 PIN_PB02
-#define B03 PIN_PB03
-#define B04 PIN_PB04
-#define B05 PIN_PB05
-#define B06 PIN_PB06
-#define B07 PIN_PB07
-#define B08 PIN_PB08
-#define B09 PIN_PB09
-#define B10 PIN_PB10
-#define B11 PIN_PB11
-#define B12 PIN_PB12
-#define B13 PIN_PB13
-#define B14 PIN_PB14
-#define B15 PIN_PB15
-#define B16 PIN_PB16
-#define B17 PIN_PB17
-#define B18 PIN_PB18
-#define B19 PIN_PB19
-#define B20 PIN_PB20
-#define B21 PIN_PB21
-#define B22 PIN_PB22
-#define B23 PIN_PB23
-#define B24 PIN_PB24
-#define B25 PIN_PB25
-#define B26 PIN_PB26
-#define B27 PIN_PB27
-#define B28 PIN_PB28
-#define B29 PIN_PB29
-#define B30 PIN_PB30
-#define B31 PIN_PB31
+static const pin_impl_t pin_B00 = {.type = PIN_MCU, .mcu_pin = PIN_PB00};
+static const pin_impl_t pin_B01 = {.type = PIN_MCU, .mcu_pin = PIN_PB01};
+static const pin_impl_t pin_B02 = {.type = PIN_MCU, .mcu_pin = PIN_PB02};
+static const pin_impl_t pin_B03 = {.type = PIN_MCU, .mcu_pin = PIN_PB03};
+static const pin_impl_t pin_B04 = {.type = PIN_MCU, .mcu_pin = PIN_PB04};
+static const pin_impl_t pin_B05 = {.type = PIN_MCU, .mcu_pin = PIN_PB05};
+static const pin_impl_t pin_B06 = {.type = PIN_MCU, .mcu_pin = PIN_PB06};
+static const pin_impl_t pin_B07 = {.type = PIN_MCU, .mcu_pin = PIN_PB07};
+static const pin_impl_t pin_B08 = {.type = PIN_MCU, .mcu_pin = PIN_PB08};
+static const pin_impl_t pin_B09 = {.type = PIN_MCU, .mcu_pin = PIN_PB09};
+static const pin_impl_t pin_B10 = {.type = PIN_MCU, .mcu_pin = PIN_PB10};
+static const pin_impl_t pin_B11 = {.type = PIN_MCU, .mcu_pin = PIN_PB11};
+static const pin_impl_t pin_B12 = {.type = PIN_MCU, .mcu_pin = PIN_PB12};
+static const pin_impl_t pin_B13 = {.type = PIN_MCU, .mcu_pin = PIN_PB13};
+static const pin_impl_t pin_B14 = {.type = PIN_MCU, .mcu_pin = PIN_PB14};
+static const pin_impl_t pin_B15 = {.type = PIN_MCU, .mcu_pin = PIN_PB15};
+static const pin_impl_t pin_B16 = {.type = PIN_MCU, .mcu_pin = PIN_PB16};
+static const pin_impl_t pin_B17 = {.type = PIN_MCU, .mcu_pin = PIN_PB17};
+static const pin_impl_t pin_B22 = {.type = PIN_MCU, .mcu_pin = PIN_PB22};
+static const pin_impl_t pin_B23 = {.type = PIN_MCU, .mcu_pin = PIN_PB23};
+static const pin_impl_t pin_B30 = {.type = PIN_MCU, .mcu_pin = PIN_PB30};
+static const pin_impl_t pin_B31 = {.type = PIN_MCU, .mcu_pin = PIN_PB31};
+
+
+#define A00 ((pin_t)&pin_A00)
+#define A01 ((pin_t)&pin_A01)
+#define A02 ((pin_t)&pin_A02)
+#define A03 ((pin_t)&pin_A03)
+#define A04 ((pin_t)&pin_A04)
+#define A05 ((pin_t)&pin_A05)
+#define A06 ((pin_t)&pin_A06)
+#define A07 ((pin_t)&pin_A07)
+#define A08 ((pin_t)&pin_A08)
+#define A09 ((pin_t)&pin_A09)
+#define A10 ((pin_t)&pin_A10)
+#define A11 ((pin_t)&pin_A11)
+#define A12 ((pin_t)&pin_A12)
+#define A13 ((pin_t)&pin_A13)
+#define A14 ((pin_t)&pin_A14)
+#define A15 ((pin_t)&pin_A15)
+#define A16 ((pin_t)&pin_A16)
+#define A17 ((pin_t)&pin_A17)
+#define A18 ((pin_t)&pin_A18)
+#define A19 ((pin_t)&pin_A19)
+#define A20 ((pin_t)&pin_A20)
+#define A21 ((pin_t)&pin_A21)
+#define A22 ((pin_t)&pin_A22)
+#define A23 ((pin_t)&pin_A23)
+#define A24 ((pin_t)&pin_A24)
+#define A25 ((pin_t)&pin_A25)
+#define A27 ((pin_t)&pin_A27)
+#define A30 ((pin_t)&pin_A30)
+#define A31 ((pin_t)&pin_A31)
+
+#define B00 ((pin_t)&pin_B00)
+#define B01 ((pin_t)&pin_B01)
+#define B02 ((pin_t)&pin_B02)
+#define B03 ((pin_t)&pin_B03)
+#define B04 ((pin_t)&pin_B04)
+#define B05 ((pin_t)&pin_B05)
+#define B06 ((pin_t)&pin_B06)
+#define B07 ((pin_t)&pin_B07)
+#define B08 ((pin_t)&pin_B08)
+#define B09 ((pin_t)&pin_B09)
+#define B10 ((pin_t)&pin_B10)
+#define B11 ((pin_t)&pin_B11)
+#define B12 ((pin_t)&pin_B12)
+#define B13 ((pin_t)&pin_B13)
+#define B14 ((pin_t)&pin_B14)
+#define B15 ((pin_t)&pin_B15)
+#define B16 ((pin_t)&pin_B16)
+#define B17 ((pin_t)&pin_B17)
+#define B22 ((pin_t)&pin_B22)
+#define B23 ((pin_t)&pin_B23)
+#define B30 ((pin_t)&pin_B30)
+#define B31 ((pin_t)&pin_B31)
+
+
+// =====
+// These dont exist...
+#if 0
+static const pin_impl_t pin_A26 = {.type = PIN_MCU, .mcu_pin = PIN_PA26};
+static const pin_impl_t pin_A28 = {.type = PIN_MCU, .mcu_pin = PIN_PA28};
+static const pin_impl_t pin_A29 = {.type = PIN_MCU, .mcu_pin = PIN_PA29};
+static const pin_impl_t pin_B18 = {.type = PIN_MCU, .mcu_pin = PIN_PB18};
+static const pin_impl_t pin_B19 = {.type = PIN_MCU, .mcu_pin = PIN_PB19};
+static const pin_impl_t pin_B20 = {.type = PIN_MCU, .mcu_pin = PIN_PB20};
+static const pin_impl_t pin_B21 = {.type = PIN_MCU, .mcu_pin = PIN_PB21};
+static const pin_impl_t pin_B24 = {.type = PIN_MCU, .mcu_pin = PIN_PB24};
+static const pin_impl_t pin_B25 = {.type = PIN_MCU, .mcu_pin = PIN_PB25};
+static const pin_impl_t pin_B26 = {.type = PIN_MCU, .mcu_pin = PIN_PB26};
+static const pin_impl_t pin_B27 = {.type = PIN_MCU, .mcu_pin = PIN_PB27};
+static const pin_impl_t pin_B28 = {.type = PIN_MCU, .mcu_pin = PIN_PB28};
+static const pin_impl_t pin_B29 = {.type = PIN_MCU, .mcu_pin = PIN_PB29};
+
+#define A26 ((pin_t)&pin_A26)
+#define A28 ((pin_t)&pin_A28)
+#define A29 ((pin_t)&pin_A29)
+#define B18 ((pin_t)&pin_B18)
+#define B19 ((pin_t)&pin_B19)
+#define B20 ((pin_t)&pin_B20)
+#define B21 ((pin_t)&pin_B21)
+#define B24 ((pin_t)&pin_B24)
+#define B25 ((pin_t)&pin_B25)
+#define B26 ((pin_t)&pin_B26)
+#define B27 ((pin_t)&pin_B27)
+#define B28 ((pin_t)&pin_B28)
+#define B29 ((pin_t)&pin_B29)
+#endif

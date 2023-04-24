@@ -33,11 +33,22 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #    define SPI_SCLK_MUX_SEL PMUXO
 #endif
 
-static pin_t currentSelectPin = NO_PIN;
+static bool spiStarted = false;
+static pin_t currentSlavePin;
 
 __attribute__((weak)) void spi_init(void) {
     static bool is_initialised = false;
     if (!is_initialised) {
+        mcu_pin_t sck  = 0;
+        bool sck_real  = get_mcu_pin(SPI_SCLK_PIN, &sck);
+        mcu_pin_t mosi = 0;
+        bool mosi_real = get_mcu_pin(SPI_DATAOUT_PIN, &mosi);
+
+        if (!sck_real) {
+            dprintln("Can't configure SPI with SCK being a virtual pin");
+            return;
+        }
+
         is_initialised = true;
 
         DBGC(DC_SPI_INIT_BEGIN);
@@ -45,23 +56,35 @@ __attribute__((weak)) void spi_init(void) {
         CLK_set_spi_freq(CHAN_SERCOM_SPI, FREQ_SPI_DEFAULT);
 
         // Set up MCU SPI pins
-        PORT->Group[SAMD_PORT(SPI_DATAOUT_PIN)].PMUX[SAMD_PIN(SPI_DATAOUT_PIN) / 2].bit.SPI_DATAOUT_MUX_SEL = SPI_DATAOUT_MUX; // MUX select for sercom
-        PORT->Group[SAMD_PORT(SPI_SCLK_PIN)].PMUX[SAMD_PIN(SPI_SCLK_PIN) / 2].bit.SPI_SCLK_MUX_SEL          = SPI_SCLK_MUX;    // MUX select for sercom
-        PORT->Group[SAMD_PORT(SPI_DATAOUT_PIN)].PINCFG[SAMD_PIN(SPI_DATAOUT_PIN)].bit.PMUXEN                = 1;               // MUX Enable
-        PORT->Group[SAMD_PORT(SPI_SCLK_PIN)].PINCFG[SAMD_PIN(SPI_SCLK_PIN)].bit.PMUXEN                      = 1;               // MUX Enable
+        PORT->Group[SAMD_PORT(sck)].PMUX[SAMD_PIN(sck) / 2].bit.SPI_SCLK_MUX_SEL          = SPI_SCLK_MUX;    // MUX select for sercom
+        PORT->Group[SAMD_PORT(sck)].PINCFG[SAMD_PIN(sck)].bit.PMUXEN                      = 1;               // MUX Enable
+
+        if (mosi_real) {
+            PORT->Group[SAMD_PORT(mosi)].PMUX[SAMD_PIN(mosi) / 2].bit.SPI_DATAOUT_MUX_SEL = SPI_DATAOUT_MUX; // MUX select for sercom
+            PORT->Group[SAMD_PORT(mosi)].PINCFG[SAMD_PIN(mosi)].bit.PMUXEN                = 1;               // MUX Enable
+        } else {
+            dprintln("Configuring SPI with a virtual MOSI pin, leading to the signal being lost");
+        }
 
         DBGC(DC_SPI_INIT_COMPLETE);
+        spiStarted = false;
     }
 }
 
 bool spi_start(pin_t csPin, bool lsbFirst, uint8_t mode, uint16_t divisor) {
-    if (currentSelectPin != NO_PIN || csPin == NO_PIN) {
+    if (spiStarted) {
         return false;
     }
 
-    currentSelectPin = csPin;
-    setPinOutput(currentSelectPin);
-    writePinLow(currentSelectPin);
+    if (csPin == NO_PIN) {
+        dprintln("Starting SPI without CS pin");
+    }
+
+    spiStarted = true;
+
+    currentSlavePin = csPin;
+    setPinOutput(csPin);
+    writePinLow(csPin);
 
     SPI_SERCOM->SPI.CTRLA.bit.DORD = lsbFirst; // Data Order - LSB is transferred first
     SPI_SERCOM->SPI.CTRLA.bit.CPOL = 1;        // Clock Polarity - SCK high when idle. Leading edge of cycle is falling. Trailing rising.
@@ -93,10 +116,10 @@ spi_status_t spi_transmit(const uint8_t *data, uint16_t length) {
 }
 
 void spi_stop(void) {
-    if (currentSelectPin != NO_PIN) {
-        setPinOutput(currentSelectPin);
-        writePinHigh(currentSelectPin);
-        currentSelectPin = NO_PIN;
+    if (spiStarted) {
+        setPinOutput(currentSlavePin);
+        writePinHigh(currentSlavePin);
+        spiStarted = false;
     }
 }
 

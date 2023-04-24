@@ -18,21 +18,5 @@
 #include <avr/io.h>
 #include "pin_defs.h"
 
-typedef uint8_t pin_t;
+extern const pin_vtable_t gpio_pin_vtable_mcu;
 
-/* Operation of GPIO by pin. */
-
-#define setPinInput(pin) (DDRx_ADDRESS(pin) &= ~_BV((pin)&0xF), PORTx_ADDRESS(pin) &= ~_BV((pin)&0xF))
-#define setPinInputHigh(pin) (DDRx_ADDRESS(pin) &= ~_BV((pin)&0xF), PORTx_ADDRESS(pin) |= _BV((pin)&0xF))
-#define setPinInputLow(pin) _Static_assert(0, "AVR processors cannot implement an input as pull low")
-#define setPinOutputPushPull(pin) (DDRx_ADDRESS(pin) |= _BV((pin)&0xF))
-#define setPinOutputOpenDrain(pin) _Static_assert(0, "AVR platform does not implement an open-drain output")
-#define setPinOutput(pin) setPinOutputPushPull(pin)
-
-#define writePinHigh(pin) (PORTx_ADDRESS(pin) |= _BV((pin)&0xF))
-#define writePinLow(pin) (PORTx_ADDRESS(pin) &= ~_BV((pin)&0xF))
-#define writePin(pin, level) ((level) ? writePinHigh(pin) : writePinLow(pin))
-
-#define readPin(pin) ((bool)(PINx_ADDRESS(pin) & _BV((pin)&0xF)))
-
-#define togglePin(pin) (PORTx_ADDRESS(pin) ^= _BV((pin)&0xF))

@@ -1,4 +1,5 @@
 // Copyright 2022 Stefan Kerkmann
+// Copyright 2023 Pablo Martinez (@elpekenin)
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 #include "quantum.h"
@@ -6,17 +7,21 @@
 #include "bootloader.h"
 #include "pico/bootrom.h"
 
+uint32_t get_led_mask(void) {
 #if !defined(RP2040_BOOTLOADER_DOUBLE_TAP_RESET_LED)
-#    define RP2040_BOOTLOADER_DOUBLE_TAP_RESET_LED_MASK 0U
+    return 0;
 #else
-#    define RP2040_BOOTLOADER_DOUBLE_TAP_RESET_LED_MASK (1U << RP2040_BOOTLOADER_DOUBLE_TAP_RESET_LED)
+    mcu_pin_t pin = 0;
+    bool ret = get_mcu_pin(RP2040_BOOTLOADER_DOUBLE_TAP_RESET_LED, &pin);
+    return ret ? (1 << pin) : 0;
 #endif
+}
 
 __attribute__((weak)) void mcu_reset(void) {
     NVIC_SystemReset();
 }
 void bootloader_jump(void) {
-    reset_usb_boot(RP2040_BOOTLOADER_DOUBLE_TAP_RESET_LED_MASK, 0U);
+    reset_usb_boot(get_led_mask(), 0U);
 }
 
 void enter_bootloader_mode_if_requested(void) {}
@@ -50,7 +55,7 @@ void __late_init(void) {
     }
 
     magic_location = 0;
-    reset_usb_boot(RP2040_BOOTLOADER_DOUBLE_TAP_RESET_LED_MASK, 0U);
+    reset_usb_boot(get_led_mask(), 0U);
 }
 
 #endif

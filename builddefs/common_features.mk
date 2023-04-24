@@ -28,8 +28,12 @@ QUANTUM_SRC += \
     $(QUANTUM_DIR)/sync_timer.c \
     $(QUANTUM_DIR)/logging/debug.c \
     $(QUANTUM_DIR)/logging/sendchar.c \
+    $(QUANTUM_DIR)/pin/pin.c
 
-VPATH += $(QUANTUM_DIR)/logging
+VPATH += \
+    $(QUANTUM_DIR)/pin \
+    $(QUANTUM_DIR)/logging
+
 # Fall back to lib/printf if there is no platform provided print
 ifeq ("$(wildcard $(PLATFORM_PATH)/$(PLATFORM_KEY)/printf.mk)","")
     include $(QUANTUM_PATH)/logging/print.mk
