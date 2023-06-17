@@ -939,3 +939,8 @@ ifeq ($(strip $(OS_DETECTION_ENABLE)), yes)
         OPT_DEFS += -DOS_DETECTION_DEBUG_ENABLE
     endif
 endif
+
+FILESYSTEM_DRIVER ?=
+ifneq ($(strip $(FILESYSTEM_DRIVER)),)
+    include $(QUANTUM_DIR)/filesystem/rules.mk
+endif
