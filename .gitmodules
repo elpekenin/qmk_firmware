@@ -28,3 +28,6 @@
 [submodule "lib/fatfs"]
 	path = lib/fatfs
 	url = https://github.com/elpekenin/fatfs
+[submodule "lib/lua"]
+	path = lib/lua
+	url = https://github.com/lua/lua.git

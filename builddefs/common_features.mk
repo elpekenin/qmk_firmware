@@ -944,3 +944,9 @@ FILESYSTEM_DRIVER ?=
 ifneq ($(strip $(FILESYSTEM_DRIVER)),)
     include $(QUANTUM_DIR)/filesystem/rules.mk
 endif
+
+ifeq ($(strip $(LUA_ENABLE)), yes)
+    OPT_DEFS += -DLUA_ENABLE -DMAKE_LIB -DLUA_32BITS -DLUA_INT_TYPE=LUA_INT_INT -DLUA_FLOAT_TYPE=LUA_FLOAT_FLOAT
+    COMMON_VPATH += $(LIB_PATH)/lua $(QUANTUM_PATH)/lua
+    SRC += lua-init.c lua-bindings.c
+endif

@@ -13,3 +13,5 @@
 #define SPI_DIV  8
 
 #undef DEBUG_MATRIX_SCAN_RATE
+
+#define READ_BUFFER_SIZE 1024

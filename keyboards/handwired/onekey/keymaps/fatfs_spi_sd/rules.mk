@@ -1,3 +1,4 @@
 FILESYSTEM_DRIVER = fatfs_spi_sd_card
 CONSOLE_ENABLE = yes
 DEFERRED_EXEC_ENABLE = yes
+LUA_ENABLE = yes
