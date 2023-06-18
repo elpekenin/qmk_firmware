@@ -89,26 +89,55 @@ static int fatfs_read_file_impl(lua_State *L) {
 uint32_t deferred_init(uint32_t t, void* cb_arg) {
     f_mount(&FatFs, "", 0);
 
-    // Test content to be read
+   // function to execute a file
     write(
-        "content.txt",
-    
-        "this file was read from lua"
-    );
+        "exec.lua",
 
-    // lua code to define a test function
-    write(
-        "test.lua",
-
-        "function lua_test_fn(path)\n"
-        "    dprint('Printing from lua')\n"
-        "    dprint('-----------------')\n"
-        "    dprint(\"'\" .. path .. \"' contains: '\" .. fatfs_read_file(path) .. \"'\")\n"
+        "function exec(path, args)\n"
+        "    -- guard clause the path value\n"
+        "    if path == nil or path == '' then\n"
+        "        dprint('ERROR: Gotta pass a path to exec')\n"
+        "        return\n"
+        "    end\n"
+        "\n"
+        "    -- load(code) returns a function which executes the file's contents\n"
+        "    -- the file itself returns another function, retrieved with g = f()\n"
+        "    code = fatfs_read_file(path)\n"
+        "    f = load(code)\n"
+        "    g = f()\n"
+        "    g(args)\n"
         "end\n"
     );
 
-    // Read file content and convert it into a function
-    char *lua_code = read("test.lua");
+    // example function to be `exec`
+    write(
+        "recurse.lua",
+
+        "function _f(args)\n"
+        "    -- 1st iteration, start value\n"
+        "    if args == nil then\n"
+        "        args = {}\n"
+        "        args[0] = 10\n"
+        "    end\n"
+        "\n"
+        "    n = args[0]\n"
+        "    dprint('Recursive with value: ' .. n)\n"
+        "\n"
+        "    -- base case, gotta end somewhere\n"
+        "    if n == 0 then\n"
+        "        return\n"
+        "    end\n"
+        "\n"
+        "    args[0] = n - 1\n"
+        "    -- calls itself again, with n-1 \n"
+        "    wait_us(1e6)\n"
+        // should work but fails in non-deterministic iterations
+        // "    exec('recurse.lua', args)\n"
+        "    _f(args)\n"
+        "end\n"
+        "\n"
+        "return _f"
+    );
 
     extern lua_State *qmk_lua_newstate(void); // forward declaration
     lua_State *L = qmk_lua_newstate();
@@ -118,25 +147,26 @@ uint32_t deferred_init(uint32_t t, void* cb_arg) {
         return 0;
     }
 
-    if (luaL_loadstring(L, lua_code) != LUA_OK) {
+    // load exec.lua code
+    char *exec_code = read("exec.lua");
+    if (luaL_loadstring(L, exec_code) != LUA_OK) {
         printf("luaL_loadstring failed\n");
         return 0;
     }
-
     if (lua_pcall(L, 0, 1, 0) != LUA_OK) {
         printf("lua_pcall failed\n");
         return 0;
     }
-
     lua_pop(L, lua_gettop(L));
 
     // Add fatfs_read_file binding
     lua_register(L, "fatfs_read_file", fatfs_read_file_impl);
 
-    // Call it
-    lua_getglobal(L, "lua_test_fn");
-    lua_pushstring(L, "content.txt"); // path parameter
-    lua_pcall(L, 1, 0, 0);
+    // Call
+    lua_getglobal(L, "exec");
+    lua_pushstring(L, "recurse.lua"); // path parameter
+    lua_pushnil(L); // args parameter
+    lua_pcall(L, 2, 0, 0);
 
     // Cleanup
     lua_close(L);
