@@ -9,4 +9,7 @@
 #define SPI_MISO_PIN GP12
 #define SD_CS_PIN GP13
 
-#define FILESYSTEM_DEBUG
+#define SPI_MODE 0
+#define SPI_DIV  8
+
+#undef DEBUG_MATRIX_SCAN_RATE

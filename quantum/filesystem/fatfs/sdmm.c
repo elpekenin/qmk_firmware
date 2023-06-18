@@ -62,6 +62,7 @@ static void mmc_receive(
     BYTE *buff,    /* Pointer to read buffer */
     UINT bc        /* Number of bytes to receive */
 ) {
+
     // maybe QMK sends 0xFF always?
     for (UINT i=0; i < bc; ++i) {
         buff[i] = spi_write(0xFF);
@@ -247,6 +248,7 @@ DSTATUS disk_initialize (
 
     /* Initialize SPI */
     spi_init();
+    spi_start(SD_CS_PIN, false, SPI_MODE, SPI_DIV);
 
     for (n = 10; n; n--) mmc_receive(buf, 1);  /* Apply 80 dummy clocks and the card gets ready to receive command */
 

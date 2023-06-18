@@ -11,29 +11,57 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 FATFS FatFs;
 FIL Fil;
 
-uint32_t deferred_init(uint32_t t, void* cb_arg) {
+void write(char *path, BYTE *buff, UINT btw) {
     UINT bw;
     FRESULT fr;
 
+    printf("Writing '%s' to '%s'\n", buff, path);
+
+    fr = f_open(&Fil, path, FA_WRITE | FA_CREATE_ALWAYS);
+    if (fr == FR_OK) {
+        f_write(&Fil, buff, btw, &bw);
+
+        fr = f_close(&Fil);
+        if (fr == FR_OK && bw == btw) {
+            printf("File closed\n");
+        }
+    }
+}
+
+void read(char *path, UINT btr) {
+    UINT br;
+    BYTE buff[100];
+    FRESULT fr;
+
+    printf("Reading from '%s'\n", path);
+
+    fr = f_open(&Fil, path, FA_READ);
+    if (fr == FR_OK) {
+        f_read(&Fil, buff, btr, &br);
+
+        printf("Found %d bytes: ", br);
+        for (UINT i=0; i < br; ++i) {
+            printf("%c", buff[i]);
+        }
+        printf("\n");
+
+        fr = f_close(&Fil);
+        if (fr == FR_OK && br == btr) {
+            printf("File closed\n");
+        }
+    }
+}
+
+uint32_t deferred_init(uint32_t t, void* cb_arg) {
     printf("Mounting\n");
     f_mount(&FatFs, "", 0);
 
-    printf("Creating file\n");
-    fr = f_open(&Fil, "newfile.txt", FA_WRITE | FA_CREATE_ALWAYS);
-    if (fr == FR_OK) {
-        printf("Created, writing to it\n");
-        f_write(&Fil, "It works!\r\n", 11, &bw);
+    char path[] = "foo.txt";
 
-        printf("Closing file\n");
-        fr = f_close(&Fil);
+    BYTE buff[] = "hello, world!";
+    write(path, buff, sizeof(buff));
 
-        if (fr == FR_OK && bw == 11) {
-            printf("Wrote the file!\n");
-        }
-    } else {
-        // open is crashing, doesnt even get here
-        printf("Could not create\n");
-    }
+    read(path, sizeof(buff));
 
     return 0;
 }
