@@ -44,6 +44,12 @@ void     qp_comms_spi_dc_reset_bulk_command_sequence(painter_device_t device, co
 
 extern const painter_comms_with_command_vtable_t spi_comms_with_dc_vtable;
 
+void     qp_comms_spi_dc_reset_single_byte_send_command(painter_device_t device, uint8_t cmd);
+uint32_t qp_comms_spi_dc_reset_single_byte_send_data(painter_device_t device, const void* data, uint32_t byte_count);
+void     qp_comms_spi_dc_reset_single_byte_bulk_command_sequence(painter_device_t device, const uint8_t* sequence, size_t sequence_len);
+
+extern const struct painter_comms_with_command_vtable_t spi_comms_with_dc_single_byte_vtable;
+
 #    endif // QUANTUM_PAINTER_SPI_DC_RESET_ENABLE
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

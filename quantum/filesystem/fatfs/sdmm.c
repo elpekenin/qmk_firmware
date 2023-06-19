@@ -20,6 +20,7 @@
 // QMK APIs
 #include "wait.h"
 #include "spi_master.h"
+#define __SPI_START() spi_start(SD_CS_PIN, false, SPI_MODE, SPI_DIV)
 
 /*--------------------------------------------------------------------------
 
@@ -110,6 +111,7 @@ static int select (void) {  /* 1:OK, 0:Timeout */
     if (wait_ready()) return 1; /* Wait for card ready */
 
     deselect();
+
     return 0;  /* Failed */
 }
 
@@ -248,7 +250,7 @@ DSTATUS disk_initialize (
 
     /* Initialize SPI */
     spi_init();
-    spi_start(SD_CS_PIN, false, SPI_MODE, SPI_DIV);
+    __SPI_START();
 
     for (n = 10; n; n--) mmc_receive(buf, 1);  /* Apply 80 dummy clocks and the card gets ready to receive command */
 
@@ -284,7 +286,9 @@ DSTATUS disk_initialize (
     s = ty ? 0 : STA_NOINIT;
     Stat = s;
 
+    // Stop SPI
     deselect();
+    spi_stop();
 
     return s;
 }
@@ -302,6 +306,8 @@ DRESULT disk_read (
     UINT count     /* Sector count (1..128) */
 )
 {
+    __SPI_START();
+
     BYTE cmd;
     DWORD sect = (DWORD)sector;
 
@@ -317,7 +323,9 @@ DRESULT disk_read (
         } while (--count);
         if (cmd == CMD18) send_cmd(CMD12, 0);  /* STOP_TRANSMISSION */
     }
+
     deselect();
+    spi_stop();
 
     return count ? RES_ERROR : RES_OK;
 }
@@ -335,8 +343,9 @@ DRESULT disk_write (
     UINT count         /* Sector count (1..128) */
 )
 {
-    DWORD sect = (DWORD)sector;
+    __SPI_START();
 
+    DWORD sect = (DWORD)sector;
 
     if (disk_status(drv) & STA_NOINIT) return RES_NOTRDY;
     if (!(CardType & CT_BLOCK)) sect *= 512;    /* Convert LBA to byte address if needed */
@@ -356,7 +365,9 @@ DRESULT disk_write (
                 count = 1;
         }
     }
+
     deselect();
+    spi_stop();
 
     return count ? RES_ERROR : RES_OK;
 }
@@ -368,10 +379,13 @@ DRESULT disk_write (
 
 DRESULT disk_ioctl (
     BYTE drv,        /* Physical drive nmuber (0) */
-    BYTE ctrl,        /* Control code */
-    void *buff        /* Buffer to send/receive control data */
+    BYTE ctrl,       /* Control code */
+    void *buff       /* Buffer to send/receive control data */
 )
 {
+
+    __SPI_START();
+
     DRESULT res;
     BYTE n, csd[16];
     DWORD cs;
@@ -409,6 +423,7 @@ DRESULT disk_ioctl (
     }
 
     deselect();
+    spi_stop();
 
     return res;
 }
