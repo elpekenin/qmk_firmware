@@ -3,10 +3,12 @@
 
 #pragma once
 
-#include_next "halconf.h"
+#include <lua.h>
 
-#undef  HAL_USE_SPI
-#define HAL_USE_SPI  TRUE
+void lua_setup(void);
 
-#undef  SPI_USE_WAIT
-#define SPI_USE_WAIT TRUE
+int fatfs_read_file_impl(lua_State *L);
+
+void lua_exec(char *filepath);
+
+void lua_kill(void);

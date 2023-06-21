@@ -13,11 +13,7 @@
 #define RST_PIN GP20
 
 #define SPI_MODE 0
-#define SPI_DIV  16
-
-#define I2C_DRIVER I2CD0
-#define I2C1_SDA_PIN GP16
-#define I2C1_SCL_PIN GP17
+#define SPI_DIV  32
 
 #undef DEBUG_MATRIX_SCAN_RATE
 
@@ -25,3 +21,4 @@
 
 #define TEXT_BUFFER_LEN 1000
 #define TEMP_BUFF_LEN 50
+#define INPUT_BUF_LEN 20
