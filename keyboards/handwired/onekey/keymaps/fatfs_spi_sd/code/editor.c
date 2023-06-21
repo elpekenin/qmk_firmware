@@ -144,6 +144,9 @@ void editor_flush(painter_device_t device, painter_font_handle_t font) {
             printf("ERROR: how the hell are we in mode %d\n", mode);
     }
 
+    // small gap between text and border
+    sw -= 10;
+
     static int16_t last_mw = 0;
     int16_t mw = qp_textwidth(font, mode_str);
 
