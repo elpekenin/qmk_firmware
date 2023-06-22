@@ -72,15 +72,14 @@ static void move_up(void) {
     }
 
     uint16_t start_of_prev;
-    uint16_t end_of_prev = text_buffer_index - col - 1;
+    uint16_t end_of_prev = text_buffer_index - col;
     find_prev_newline(end_of_prev, &start_of_prev);
-
 
     // eg: can't move to 10th col if prev row has 8 chars, clip it
     uint16_t prev_cols = end_of_prev - start_of_prev;
     col = MIN(col, prev_cols);
 
-    text_buffer_index = start_of_prev + col;
+    text_buffer_index = start_of_prev + col - 1;
 }
 
 static void move_down(void) {
@@ -91,9 +90,10 @@ static void move_down(void) {
         // on last line, can't move down
         return;
     }
+    end_of_curr += 1;
 
     uint16_t end_of_next;
-    uint16_t start_of_next = end_of_curr + 1;
+    uint16_t start_of_next = end_of_curr;
     find_next_newline(start_of_next, &end_of_next);
 
     // eg: can't move to 10th col if next row has 8 chars, clip it
@@ -161,6 +161,10 @@ void editor_flush(painter_device_t device, painter_font_handle_t font) {
 
     redraw = false;
 
+    uint16_t sw;
+    uint16_t sh;
+    qp_get_geometry(device, &sw, &sh, NULL, NULL, NULL);
+
     uint16_t y = 0;
     uint8_t  fh = font->line_height;
 
@@ -181,12 +185,10 @@ void editor_flush(painter_device_t device, painter_font_handle_t font) {
 
         // end of line, print
         if (c == '\n') {
-            // append a couple spaces and terminate the string before drawing
-            // this will -hopefully- make sure of removing the last char on a line after backspace
-            temp_buff[temp_buff_index++] = ' ';
-            temp_buff[temp_buff_index++] = ' ';
+            // terminate the string
             temp_buff[temp_buff_index] = 0;
-            qp_drawtext(device, 0, y, font, temp_buff);
+            int16_t lw = qp_drawtext(device, 0, y, font, temp_buff);
+            qp_rect(device, 0 + lw, y, sw, y + fh, HSV_BLACK, true); // make sure rest of the line is clean
             temp_buff_index = 0;
             y += fh;
             continue;
@@ -201,10 +203,6 @@ void editor_flush(painter_device_t device, painter_font_handle_t font) {
         temp_buff[temp_buff_index++] = 0; // terminate it
         qp_drawtext(device, 0, y, font, temp_buff);
     }
-
-    uint16_t sw;
-    uint16_t sh;
-    qp_get_geometry(device, &sw, &sh, NULL, NULL, NULL);
 
     // menu on the bottom is black on white
     if (redraw_area) {
@@ -284,7 +282,7 @@ void editor_flush(painter_device_t device, painter_font_handle_t font) {
 
 void editor_menu_selection(void) {
     char *s = get_input_buffer();
-    char c = s[0];
+    char  c = s[0];
 
     // TODO: Multi-option support
 

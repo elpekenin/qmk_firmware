@@ -34,7 +34,7 @@ uint16_t mock_press(void) {
         KC_ENT,
 
         // move around
-        KC_RIGHT, KC_RIGHT, KC_RIGHT, KC_LEFT, KC_DOWN, KC_DOWN, KC_RIGHT, KC_UP,
+        KC_RIGHT, KC_RIGHT, KC_RIGHT, KC_RIGHT, KC_DOWN, KC_UP,
 
         // write something
         KC_A, KC_B,
