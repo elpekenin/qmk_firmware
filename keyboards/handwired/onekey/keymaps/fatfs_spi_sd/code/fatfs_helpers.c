@@ -86,6 +86,6 @@ void close(void) {
     FRESULT fr;
     fr = f_close(Fil);
     if (fr != FR_OK) {
-        printf("ERROR: Couldnt close a file, weird...\n");
+        printf("ERROR: Couldnt close a file, fr=%d\n", fr);
     }
 }

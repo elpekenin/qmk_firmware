@@ -1,13 +1,9 @@
 // Copyright 2023 Pablo Martinez (@elpekenin) <elpekenin@elpekenin.dev>
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-#include "keycode.h"
-
 #include "code/input.h"
 #include "code/editor.h"
 #include "code/fatfs_helpers.h"
-
-enum custom_keycodes { OPEN_EDITOR = QK_USER };
 
 static input_mode_t input_mode = NONE;
 
@@ -22,41 +18,6 @@ static void user_input_append(char c) {
     user_input[user_input_index++] = c;
     user_input[user_input_index]   = '\0';
 }
-
-uint16_t mock_press(void) {
-    static uint8_t i = 0;
-
-    uint16_t mock_events[] = {
-         // open file
-        OPEN_EDITOR,
-
-        // filepath
-        KC_R, KC_E, KC_C, KC_U, KC_R, KC_S, KC_E, KC_DOT, KC_L, KC_U, KC_A,
-
-        // confirm
-        KC_ENT,
-
-        // move around
-        KC_RIGHT, KC_RIGHT, KC_RIGHT, KC_LEFT,
-
-        // open menu
-        KC_ESC,
-
-        // write
-        KC_E,
-
-        // confirm
-        KC_ENT
-    };
-
-    if (i >= ARRAY_SIZE(mock_events)) {
-        printf("ERROR: Exhausted mock events for the test\n");
-        return KC_NO;
-    }
-
-    return mock_events[i++];
-}
-
 
 static char keycode_to_char(uint16_t keycode) {
     switch (keycode) {
@@ -123,7 +84,6 @@ bool path_handler(uint16_t keycode, keyrecord_t *record) {
             }
 
             user_input_append(c);
-
             editor_needs_redraw();
 
             return false;
@@ -143,11 +103,15 @@ bool edit_handler(uint16_t keycode, keyrecord_t *record) {
             editor_write_char('\n');
             return false;
 
-        case KC_LEFT:
-        case KC_RIGHT:
         case KC_UP:
+        case KC_LEFT:
         case KC_DOWN:
+        case KC_RIGHT:
             editor_move(keycode);
+            return false;
+
+        case KC_BSPC:
+            editor_delete();
             return false;
 
         default:
@@ -169,6 +133,7 @@ bool menu_handler(uint16_t keycode, keyrecord_t *record) {
         case KC_ESC:
             input_mode = EDIT;
             clear_user_input();
+            editor_needs_redraw();
             return false;
 
         case KC_ENT:
@@ -186,6 +151,8 @@ bool menu_handler(uint16_t keycode, keyrecord_t *record) {
             }
 
             user_input_append(c);
+            editor_needs_redraw();
+
             return false;
     };
 }

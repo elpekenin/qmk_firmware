@@ -20,6 +20,45 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 static painter_device_t device = NULL;
 static painter_font_handle_t font = NULL;
 
+uint16_t mock_press(void) {
+    static uint8_t i = 0;
+
+    uint16_t mock_events[] = {
+         // open file
+        OPEN_EDITOR,
+
+        // filepath
+        KC_R, KC_E, KC_C, KC_U, KC_R, KC_S, KC_E, KC_DOT, KC_L, KC_U, KC_A,
+
+        // confirm
+        KC_ENT,
+
+        // move around
+        KC_RIGHT, KC_RIGHT, KC_RIGHT, KC_LEFT, KC_DOWN, KC_DOWN, KC_RIGHT, KC_UP,
+
+        // write something
+        KC_A, KC_B,
+
+        // delete it
+        KC_BSPC, KC_BSPC,
+
+        // open menu
+        KC_ESC,
+
+        // quit
+        KC_Q,
+
+        // confirm
+        KC_ENT
+    };
+
+    if (i >= ARRAY_SIZE(mock_events)) {
+        printf("ERROR: Exhausted mock events for the test\n");
+        return KC_NO;
+    }
+
+    return mock_events[i++];
+}
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     if (!record->event.pressed) {

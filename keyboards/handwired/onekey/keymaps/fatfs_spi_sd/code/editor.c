@@ -8,11 +8,11 @@
 #include "code/lua_bindings.h"
 #include "code/fatfs_helpers.h"
 
-static bool     redraw_area = true;
 static bool     redraw      = true;
+static bool     redraw_area = true;
 static char     text_buffer[TEXT_BUFFER_LEN]; // file contents
 static char     temp_buff[TEMP_BUFF_LEN]; // make substrings (lines) for drawtext
-static uint16_t text_buffer_index = 0; // user location
+static uint16_t text_buffer_index; // user location
 static char     filepath[INPUT_BUF_LEN + 1] = {0};
 
 void editor_open(char *_filepath) {
@@ -23,6 +23,84 @@ void editor_open(char *_filepath) {
     read_into(filepath, 0, text_buffer);
 
     redraw = true;
+    // redraw_area = true;
+    text_buffer_index = 0;
+}
+
+static bool find_next_newline(uint16_t start_pos, uint16_t *index) {
+    *index = start_pos;
+
+    while (text_buffer[*index] != '\n') {
+        *index += 1;
+
+        // stop if we find a string terminator, or run out of buffer
+        if (text_buffer[*index] == '\0' || *index >= ARRAY_SIZE(text_buffer)) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+static bool find_prev_newline(uint16_t start_pos, uint16_t *index) {
+    *index = start_pos - 1;
+
+    while (text_buffer[*index] != '\n') {
+        *index -= 1;
+
+        // dont go backwards further than the start of the buffer
+        if (*index == 0) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+static uint16_t get_current_col(void) {
+    uint16_t i;
+    find_prev_newline(text_buffer_index, &i);
+    return text_buffer_index - i;
+}
+
+static void move_up(void) {
+    uint16_t col = get_current_col();
+
+    if (text_buffer_index == col) {
+        // on first line, can't move upwards
+        return;
+    }
+
+    uint16_t start_of_prev;
+    uint16_t end_of_prev = text_buffer_index - col - 1;
+    find_prev_newline(end_of_prev, &start_of_prev);
+
+
+    // eg: can't move to 10th col if prev row has 8 chars, clip it
+    uint16_t prev_cols = end_of_prev - start_of_prev;
+    col = MIN(col, prev_cols);
+
+    text_buffer_index = start_of_prev + col;
+}
+
+static void move_down(void) {
+    uint16_t col = get_current_col();
+
+    uint16_t end_of_curr;
+    if (!find_next_newline(text_buffer_index, &end_of_curr)) {
+        // on last line, can't move down
+        return;
+    }
+
+    uint16_t end_of_next;
+    uint16_t start_of_next = end_of_curr + 1;
+    find_next_newline(start_of_next, &end_of_next);
+
+    // eg: can't move to 10th col if next row has 8 chars, clip it
+    uint16_t next_cols = end_of_next - start_of_next;
+    col = MIN(col, next_cols);
+
+    text_buffer_index = start_of_next + col;
 }
 
 void editor_move(uint16_t keycode) {
@@ -36,8 +114,11 @@ void editor_move(uint16_t keycode) {
             break;
 
         case KC_UP:
+            move_up();
+            break;
+
         case KC_DOWN:
-            // TODO:
+            move_down();
             break;
     };
 
@@ -47,15 +128,31 @@ void editor_move(uint16_t keycode) {
 void editor_write_char(char c) {
     uint16_t len = strlen(text_buffer);
 
-    // move rest of text to the right
-    for (uint8_t i = len - 1 - text_buffer_index; i > 0; --i) {
-        text_buffer[i] = text_buffer[i - 1];
-    }
-
+    // shift to the rigth to make space
+    memmove(&text_buffer[text_buffer_index] + 1, &text_buffer[text_buffer_index], len - text_buffer_index);
     text_buffer[text_buffer_index++] = c;
 
     redraw = true;
 }
+
+void editor_delete(void) {
+    if (text_buffer_index == 0) {
+        return;
+    }
+
+    uint16_t len = strlen(text_buffer);
+
+    // also moves the \0 backwards
+    for (uint16_t i = text_buffer_index - 1; i < len; ++i) {
+        text_buffer[i] = text_buffer[i + 1];
+    }
+
+    // move left
+    text_buffer_index--;
+
+    redraw = true;
+}
+
 
 void editor_flush(painter_device_t device, painter_font_handle_t font) {
     if (!redraw) {
@@ -84,7 +181,11 @@ void editor_flush(painter_device_t device, painter_font_handle_t font) {
 
         // end of line, print
         if (c == '\n') {
-            temp_buff[temp_buff_index] = 0; // terminate the string before drawing
+            // append a couple spaces and terminate the string before drawing
+            // this will -hopefully- make sure of removing the last char on a line after backspace
+            temp_buff[temp_buff_index++] = ' ';
+            temp_buff[temp_buff_index++] = ' ';
+            temp_buff[temp_buff_index] = 0;
             qp_drawtext(device, 0, y, font, temp_buff);
             temp_buff_index = 0;
             y += fh;
@@ -117,6 +218,10 @@ void editor_flush(painter_device_t device, painter_font_handle_t font) {
 
     }
 
+    // small gap between text and border
+    sw -= 10;
+    sh -= 5;
+
     // status
     input_mode_t mode  = get_input_mode();
     char *       input = get_input_buffer();
@@ -143,9 +248,6 @@ void editor_flush(painter_device_t device, painter_font_handle_t font) {
         default:
             printf("ERROR: how the hell are we in mode %d\n", mode);
     }
-
-    // small gap between text and border
-    sw -= 10;
 
     static int16_t last_mw = 0;
     int16_t mw = qp_textwidth(font, mode_str);

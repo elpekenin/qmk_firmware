@@ -13,8 +13,6 @@ typedef enum {
     __N_MODES
 } input_mode_t;
 
-uint16_t mock_press(void);
-
 typedef bool (*process_func_t)(uint16_t k, keyrecord_t *kr);
 
 bool process_input_mode(uint16_t k, keyrecord_t *kr);

@@ -11,6 +11,7 @@ void editor_open(char *_filepath);
 
 void editor_move(uint16_t keycode);
 
+void editor_delete(void);
 void editor_write_char(char c);
 
 void editor_needs_redraw(void);

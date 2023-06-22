@@ -13,7 +13,7 @@
 #define RST_PIN GP20
 
 #define SPI_MODE 0
-#define SPI_DIV  32
+#define SPI_DIV  8
 
 #undef DEBUG_MATRIX_SCAN_RATE
 
@@ -22,3 +22,5 @@
 #define TEXT_BUFFER_LEN 1000
 #define TEMP_BUFF_LEN 50
 #define INPUT_BUF_LEN 20
+
+#define OPEN_EDITOR QK_USER

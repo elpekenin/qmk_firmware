@@ -116,14 +116,6 @@ void lua_setup(void) {
         return;
     }
 
-    // load exec.lua code
-    char *exec_code = read("exec.lua", 0);
-    if (luaL_dostring(L, exec_code) != LUA_OK) {
-        printf("running 'exec.lua' failed\n");
-        return;
-    }
-    lua_pop(L, lua_gettop(L));
-
     // Add fatfs_read_file binding
     lua_register(L, "fatfs_read_file", fatfs_read_file_impl);
 
