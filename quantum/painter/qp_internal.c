@@ -21,6 +21,15 @@ enum {
 
 static painter_device_t qp_devices[QP_NUM_DEVICES] = {NULL};
 
+painter_device_t qp_get_device(uint8_t device_id) {
+    if (device_id > QP_NUM_DEVICES) {
+        qp_dprintf("qp_get_device: fail (invalid value %d, there are %d devices)\n", device_id, QP_NUM_DEVICES);
+        return NULL;
+    }
+
+    return qp_devices[device_id];
+}
+
 bool qp_internal_register_device(painter_device_t driver) {
     for (uint8_t i = 0; i < QP_NUM_DEVICES; i++) {
         if (qp_devices[i] == NULL) {

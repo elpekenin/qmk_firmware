@@ -27,26 +27,35 @@ uint16_t mock_press(void) {
          // open file
         OPEN_EDITOR,
 
-        // filepath
-        KC_R, KC_E, KC_C, KC_U, KC_R, KC_S, KC_E, KC_DOT, KC_L, KC_U, KC_A,
+        // file
+        KC_H, KC_O, KC_U, KC_S, KC_E,
+
+        // .lua
+        KC_DOT, KC_L, KC_U, KC_A,
 
         // confirm
         KC_ENT,
 
-        // move around
-        KC_RIGHT, KC_RIGHT, KC_RIGHT, KC_RIGHT, KC_DOWN, KC_UP,
+        // get to the line
+        KC_DOWN, KC_DOWN, KC_DOWN, KC_DOWN, KC_DOWN, KC_DOWN, KC_DOWN, KC_DOWN, KC_DOWN, KC_DOWN, KC_DOWN,
 
-        // write something
-        KC_A, KC_B,
+        // indentation
+        KC_RIGHT, KC_RIGHT, KC_RIGHT, KC_RIGHT, KC_RIGHT, KC_RIGHT, KC_RIGHT, KC_RIGHT,
 
-        // delete it
-        KC_BSPC, KC_BSPC,
+        // "HSV_RED"
+        KC_RIGHT, KC_RIGHT, KC_RIGHT, KC_RIGHT, KC_RIGHT, KC_RIGHT, KC_RIGHT,
+
+        // remove RED
+        KC_BSPC, KC_BSPC, KC_BSPC,
+
+        // write BLUE
+        KC_B, KC_L, KC_U, KC_E,
 
         // open menu
         KC_ESC,
 
-        // quit
-        KC_Q,
+        // save
+        KC_W,
 
         // confirm
         KC_ENT
@@ -107,4 +116,12 @@ void housekeeping_task_user(void) {
     }
 
     editor_flush(device, font);
+
+    static uint16_t timer = 0;
+    if (timer_elapsed(timer) < 5000) {
+        return;
+    }
+    timer = timer_read();
+
+    lua_exec("house.lua");
 }

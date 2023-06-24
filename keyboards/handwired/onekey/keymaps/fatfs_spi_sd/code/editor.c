@@ -16,10 +16,10 @@ static uint16_t text_buffer_index; // user location
 static char     filepath[INPUT_BUF_LEN + 1] = {0};
 
 void editor_open(char *_filepath) {
-    memset(filepath, 0, INPUT_BUF_LEN);
+    memset(filepath, 0, ARRAY_SIZE(filepath));
     strcpy(filepath, _filepath);
 
-    memset(text_buffer, 0, TEXT_BUFFER_LEN);
+    memset(text_buffer, 0, ARRAY_SIZE(text_buffer));
     read_into(filepath, 0, text_buffer);
 
     redraw = true;
@@ -34,7 +34,7 @@ static bool find_next_newline(uint16_t start_pos, uint16_t *index) {
         *index += 1;
 
         // stop if we find a string terminator, or run out of buffer
-        if (text_buffer[*index] == '\0' || *index >= ARRAY_SIZE(text_buffer)) {
+        if (*index >= ARRAY_SIZE(text_buffer) || text_buffer[*index] == '\0') {
             return false;
         }
     }
@@ -60,7 +60,14 @@ static bool find_prev_newline(uint16_t start_pos, uint16_t *index) {
 static uint16_t get_current_col(void) {
     uint16_t i;
     find_prev_newline(text_buffer_index, &i);
-    return text_buffer_index - i;
+
+    uint16_t col = text_buffer_index - i;
+
+    if (col > text_buffer_index) {
+        return text_buffer_index;
+    }
+
+    return col;
 }
 
 static void move_up(void) {
@@ -83,7 +90,7 @@ static void move_up(void) {
 }
 
 static void move_down(void) {
-    uint16_t col = get_current_col();
+    uint16_t col = get_current_col() - 1;
 
     uint16_t end_of_curr;
     if (!find_next_newline(text_buffer_index, &end_of_curr)) {
@@ -153,6 +160,15 @@ void editor_delete(void) {
     redraw = true;
 }
 
+static void draw_line(painter_device_t device, painter_font_handle_t font, uint16_t *y, uint16_t sw, char *text) {
+    uint16_t fh = font->line_height;
+
+    int16_t lw = qp_drawtext(device, 0, *y, font, text);
+
+    qp_rect(device, lw, *y, sw, *y + fh, HSV_BLACK, true); // make sure rest of the line is clean
+
+    *y += fh;
+}
 
 void editor_flush(painter_device_t device, painter_font_handle_t font) {
     if (!redraw) {
@@ -187,10 +203,8 @@ void editor_flush(painter_device_t device, painter_font_handle_t font) {
         if (c == '\n') {
             // terminate the string
             temp_buff[temp_buff_index] = 0;
-            int16_t lw = qp_drawtext(device, 0, y, font, temp_buff);
-            qp_rect(device, 0 + lw, y, sw, y + fh, HSV_BLACK, true); // make sure rest of the line is clean
+            draw_line(device, font, &y, sw, temp_buff);
             temp_buff_index = 0;
-            y += fh;
             continue;
         }
 
@@ -201,7 +215,8 @@ void editor_flush(painter_device_t device, painter_font_handle_t font) {
     // leftover text
     if (temp_buff_index) {
         temp_buff[temp_buff_index++] = 0; // terminate it
-        qp_drawtext(device, 0, y, font, temp_buff);
+        draw_line(device, font, &y, sw, temp_buff);
+        temp_buff_index = 0;
     }
 
     // menu on the bottom is black on white

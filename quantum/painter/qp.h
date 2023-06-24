@@ -510,6 +510,8 @@ int16_t qp_drawtext_recolor(painter_device_t device, uint16_t x, uint16_t y, pai
 #    define SSD1351_NUM_DEVICES 0
 #endif // QUANTUM_PAINTER_SSD1351_ENABLE
 
+painter_device_t qp_get_device(uint8_t device_id);
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Quantum Painter Extras
 
