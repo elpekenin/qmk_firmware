@@ -128,7 +128,7 @@ static int fatfs_read_file_impl(lua_State *L) {
 static void register_colors(void) {
     // TODO: More dynamic (code-gen?)
     HSV  colors[] = {{HSV_RED}, {HSV_BLUE}};
-    char *names[] = {"HSV_RED", "HSV_blue"};
+    char *names[] = {"HSV_RED", "HSV_BLUE"};
 
     for (uint8_t i = 0; i < ARRAY_SIZE(colors); ++i) {
         HSV color = colors[i];

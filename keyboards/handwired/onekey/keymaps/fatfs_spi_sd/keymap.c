@@ -49,6 +49,7 @@ uint16_t mock_press(void) {
         KC_BSPC, KC_BSPC, KC_BSPC,
 
         // write BLUE
+        KC_CAPS,
         KC_B, KC_L, KC_U, KC_E,
 
         // open menu
@@ -79,11 +80,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
         return false;
     }
 
-    if (!process_input_mode(keycode, record)) {
-        return false;
-    }
-
-    return true;
+    return process_input_mode(keycode, record);
 }
 
 uint32_t deferred_init(uint32_t t, void* cb_arg) {

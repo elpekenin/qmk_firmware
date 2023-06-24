@@ -303,14 +303,17 @@ void editor_menu_selection(void) {
 
     switch (c) {
         case 'q':
+        case 'Q':
             close();
             break;
 
         case 'w':
+        case 'W':
             write(filepath, text_buffer, 0);
             break;
 
         case 'e':
+        case 'E':
             write(filepath, text_buffer, 0);
             lua_exec(filepath);
             break;

@@ -19,10 +19,21 @@ static void user_input_append(char c) {
     user_input[user_input_index]   = '\0';
 }
 
+static char keycode_to_letter(uint16_t keycode) {
+    bool caps  = host_keyboard_led_state().caps_lock;
+    bool shift = (get_mods() | get_oneshot_mods() | get_weak_mods()) & MOD_MASK_SHIFT;
+
+    if (caps ^ shift) {
+        return keycode - KC_A + 'A';
+    }
+
+    return keycode - KC_A + 'a';
+}
+
 static char keycode_to_char(uint16_t keycode) {
     switch (keycode) {
         case KC_A ... KC_Z:
-            return keycode - KC_A + 'a';
+            return keycode_to_letter(keycode);
 
         case KC_1 ... KC_0:
             return keycode - KC_1 + '0';
@@ -117,6 +128,7 @@ bool edit_handler(uint16_t keycode, keyrecord_t *record) {
         default:
             c = keycode_to_char(keycode);
 
+            // unknown keycode
             if (c == 0) {
                 return false;
             }
@@ -165,6 +177,18 @@ static const process_func_t handlers[__N_MODES] = {
 };
 
 bool process_input_mode(uint16_t keycode, keyrecord_t *record) {
+    /* This should be
+     *
+     * case KC_CAPS:
+     *    return true;
+     *
+     * But can't do that due to mocking keycodes
+     */
+    if (keycode == KC_CAPS) {
+        tap_code(KC_CAPS);
+        return false;
+    }
+
     process_func_t handler = handlers[input_mode];
     return handler(keycode, record);
 }
