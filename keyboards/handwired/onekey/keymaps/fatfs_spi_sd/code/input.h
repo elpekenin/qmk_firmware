@@ -5,6 +5,11 @@
 
 #include "action.h"
 
+// allow overriding this, just in caes
+#ifndef __mods
+#    define __mods (get_weak_mods() | get_mods() | get_oneshot_mods())
+#endif
+
 typedef enum {
     NONE,
     PATH,

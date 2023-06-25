@@ -97,6 +97,9 @@ static void move_left(void) {
 
 static void move_right(void) {
     text_buffer_index++;
+
+    // TODO: move word rigth/left
+    // if (__mods & MOD_MASK_CTRL) {
 }
 
 static void editor_backspace(void) {
@@ -117,6 +120,12 @@ static void editor_backspace(void) {
 static void editor_delete(void) {
     move_right();
     editor_backspace();
+}
+
+static void editor_tab(void) {
+    for (uint8_t i = 0; i < TAB_SIZE; ++i) {
+        move_right();
+    }
 }
 
 static void move_up(void) {
@@ -172,6 +181,7 @@ static keycode_func_map_t handlers[] = {
     {KC_DOWN,  &move_down},
     {KC_BSPC,  &editor_backspace},
     {KC_DEL,   &editor_delete},
+    {KC_TAB,   &editor_tab},
 };
 
 bool editor_handle(uint16_t keycode) {

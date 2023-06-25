@@ -7,6 +7,10 @@
 
 #include "code/input.h"
 
+#ifndef TABSIZE
+#    define TABSIZE 4
+#endif // TABSIZE
+
 void editor_open(char *_filepath);
 
 bool editor_handle(uint16_t keycode);

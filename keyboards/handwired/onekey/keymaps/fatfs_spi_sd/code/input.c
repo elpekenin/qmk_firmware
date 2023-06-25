@@ -21,7 +21,7 @@ static void user_input_append(char c) {
 
 static char keycode_to_letter(uint16_t keycode) {
     bool caps  = host_keyboard_led_state().caps_lock;
-    bool shift = (get_mods() | get_oneshot_mods() | get_weak_mods()) & MOD_MASK_SHIFT;
+    bool shift = __mods & MOD_MASK_SHIFT;
 
     if (caps ^ shift) {
         return keycode - KC_A + 'A';
