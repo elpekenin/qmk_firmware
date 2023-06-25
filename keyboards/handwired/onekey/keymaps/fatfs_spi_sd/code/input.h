@@ -13,7 +13,7 @@ typedef enum {
     __N_MODES
 } input_mode_t;
 
-typedef bool (*process_func_t)(uint16_t k, keyrecord_t *kr);
+char keycode_to_char(uint16_t keycode);
 
 bool process_input_mode(uint16_t k, keyrecord_t *kr);
 

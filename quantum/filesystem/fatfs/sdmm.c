@@ -242,13 +242,12 @@ DSTATUS disk_initialize (
 
     if (drv) return RES_NOTRDY;
 
-    wait_ms(10);
-
     /* Initialize port pin tied to CS */
     setPinOutput(SD_CS_PIN);
     writePinHigh(SD_CS_PIN);
 
     /* Initialize SPI */
+    wait_ms(10);
     spi_init();
     __SPI_START();
 

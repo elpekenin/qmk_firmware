@@ -30,7 +30,7 @@ static char keycode_to_letter(uint16_t keycode) {
     return keycode - KC_A + 'a';
 }
 
-static char keycode_to_char(uint16_t keycode) {
+char keycode_to_char(uint16_t keycode) {
     switch (keycode) {
         case KC_A ... KC_Z:
             return keycode_to_letter(keycode);
@@ -55,6 +55,20 @@ static char keycode_to_char(uint16_t keycode) {
     }
 }
 
+static bool append_to_input(uint16_t keycode) {
+    char c = keycode_to_char(keycode);
+
+    // unknown keycode, let QMK handle it
+    if (c == 0) {
+        return false;
+    }
+
+    user_input_append(c);
+    editor_needs_redraw();
+
+    return true;
+}
+
 bool none_hander(uint16_t keycode, keyrecord_t *record) {
     switch (keycode) {
         case OPEN_EDITOR:
@@ -67,8 +81,6 @@ bool none_hander(uint16_t keycode, keyrecord_t *record) {
 }
 
 bool path_handler(uint16_t keycode, keyrecord_t *record) {
-    char c;
-
     switch (keycode) {
         case KC_ESC:
             input_mode = NONE;
@@ -87,60 +99,23 @@ bool path_handler(uint16_t keycode, keyrecord_t *record) {
             return false;
 
         default:
-            c = keycode_to_char(keycode);
-
-            // unknown keycode
-            if (c == 0) {
-                return false;
-            }
-
-            user_input_append(c);
-            editor_needs_redraw();
-
-            return false;
+            return append_to_input(keycode);
     };
 }
 
 bool edit_handler(uint16_t keycode, keyrecord_t *record) {
-    char c;
-
     switch (keycode) {
         case KC_ESC:
             input_mode = MENU;
             editor_needs_redraw();
             return false;
 
-        case KC_ENT:
-            editor_write_char('\n');
-            return false;
-
-        case KC_UP:
-        case KC_LEFT:
-        case KC_DOWN:
-        case KC_RIGHT:
-            editor_move(keycode);
-            return false;
-
-        case KC_BSPC:
-            editor_delete();
-            return false;
-
         default:
-            c = keycode_to_char(keycode);
-
-            // unknown keycode
-            if (c == 0) {
-                return false;
-            }
-
-            editor_write_char(c);
-            return false;
+            return editor_handle(keycode);
     }
 }
 
 bool menu_handler(uint16_t keycode, keyrecord_t *record) {
-    char c;
-
     switch (keycode) {
         case KC_ESC:
             input_mode = EDIT;
@@ -155,19 +130,11 @@ bool menu_handler(uint16_t keycode, keyrecord_t *record) {
             return false;
 
         default:
-            c = keycode_to_char(keycode);
-
-            // unknown keycode
-            if (c == 0) {
-                return false;
-            }
-
-            user_input_append(c);
-            editor_needs_redraw();
-
-            return false;
+            return append_to_input(keycode);
     };
 }
+
+typedef bool (*process_func_t)(uint16_t k, keyrecord_t *kr);
 
 static const process_func_t handlers[__N_MODES] = {
     [NONE] = &none_hander,

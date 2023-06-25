@@ -4,7 +4,7 @@
 #include "qp.h"
 #include "color.h"
 
-#include "code/input.h"
+#include "code/editor.h"
 #include "code/lua_bindings.h"
 #include "code/fatfs_helpers.h"
 
@@ -22,9 +22,10 @@ void editor_open(char *_filepath) {
     memset(text_buffer, 0, ARRAY_SIZE(text_buffer));
     read_into(filepath, 0, text_buffer);
 
-    redraw = true;
-    // redraw_area = true;
     text_buffer_index = 0;
+
+    // redraw_area = true;
+    editor_needs_redraw();
 }
 
 static bool find_next_newline(uint16_t start_pos, uint16_t *index) {
@@ -70,6 +71,54 @@ static uint16_t get_current_col(void) {
     return col;
 }
 
+// ===== Event handling
+static bool editor_write(uint16_t keycode) {
+    char c = keycode_to_char(keycode);
+
+    // unknown keycode, let QMK handle it
+    if (c == 0) {
+        return true;
+    }
+
+    uint16_t len = strlen(text_buffer);
+
+    // shift to the rigth to make space
+    memmove(&text_buffer[text_buffer_index] + 1, &text_buffer[text_buffer_index], len - text_buffer_index);
+    text_buffer[text_buffer_index++] = c;
+
+    editor_needs_redraw();
+
+    return false;
+}
+
+static void move_left(void) {
+    text_buffer_index--;
+}
+
+static void move_right(void) {
+    text_buffer_index++;
+}
+
+static void editor_backspace(void) {
+    if (text_buffer_index == 0) {
+        return;
+    }
+
+    uint16_t len = strlen(text_buffer);
+
+    // also moves the \0 backwards
+    for (uint16_t i = text_buffer_index - 1; i < len; ++i) {
+        text_buffer[i] = text_buffer[i + 1];
+    }
+
+    move_left();
+}
+
+static void editor_delete(void) {
+    move_right();
+    editor_backspace();
+}
+
 static void move_up(void) {
     uint16_t col = get_current_col();
 
@@ -110,56 +159,40 @@ static void move_down(void) {
     text_buffer_index = start_of_next + col;
 }
 
-void editor_move(uint16_t keycode) {
-    switch (keycode) {
-        case KC_LEFT:
-            text_buffer_index--;
-            break;
+typedef void (*process_func_t)(void);
+typedef struct keycode_func_map_t {
+    uint16_t       keycode;
+    process_func_t func;
+} keycode_func_map_t;
 
-        case KC_RIGHT:
-            text_buffer_index++;
-            break;
+static keycode_func_map_t handlers[] = {
+    {KC_LEFT,  &move_left},
+    {KC_RIGHT, &move_right},
+    {KC_UP,    &move_up},
+    {KC_DOWN,  &move_down},
+    {KC_BSPC,  &editor_backspace},
+    {KC_DEL,   &editor_delete},
+};
 
-        case KC_UP:
-            move_up();
-            break;
+bool editor_handle(uint16_t keycode) {
+    // try and find "special" handlert func
+    for (uint8_t i = 0; i < ARRAY_SIZE(handlers); ++i) {
+        keycode_func_map_t handler = handlers[i];
 
-        case KC_DOWN:
-            move_down();
-            break;
-    };
-
-    redraw = true;
-}
-
-void editor_write_char(char c) {
-    uint16_t len = strlen(text_buffer);
-
-    // shift to the rigth to make space
-    memmove(&text_buffer[text_buffer_index] + 1, &text_buffer[text_buffer_index], len - text_buffer_index);
-    text_buffer[text_buffer_index++] = c;
-
-    redraw = true;
-}
-
-void editor_delete(void) {
-    if (text_buffer_index == 0) {
-        return;
+        // these are moving the cursor and deleting
+        // always need redraw
+        if (keycode == handler.keycode) {
+            handler.func();
+            editor_needs_redraw();
+            return false;
+        }
     }
 
-    uint16_t len = strlen(text_buffer);
-
-    // also moves the \0 backwards
-    for (uint16_t i = text_buffer_index - 1; i < len; ++i) {
-        text_buffer[i] = text_buffer[i + 1];
-    }
-
-    // move left
-    text_buffer_index--;
-
-    redraw = true;
+    // if not found, use default one (write char)
+    return editor_write(keycode);
 }
 
+// ===== Drawing
 static void draw_line(painter_device_t device, painter_font_handle_t font, uint16_t *y, uint16_t sw, char *text) {
     uint16_t fh = font->line_height;
 
@@ -326,8 +359,8 @@ void editor_menu_selection(void) {
     memset(filepath, 0, INPUT_BUF_LEN);
     memset(text_buffer, 0, TEXT_BUFFER_LEN);
 
-    redraw = true;
     redraw_area = true;
+    editor_needs_redraw();
 }
 
 void editor_needs_redraw(void) {

@@ -42,15 +42,16 @@ uint16_t mock_press(void) {
         // indentation
         KC_RIGHT, KC_RIGHT, KC_RIGHT, KC_RIGHT, KC_RIGHT, KC_RIGHT, KC_RIGHT, KC_RIGHT,
 
-        // "HSV_RED"
-        KC_RIGHT, KC_RIGHT, KC_RIGHT, KC_RIGHT, KC_RIGHT, KC_RIGHT, KC_RIGHT,
+        // HSV_
+        KC_RIGHT, KC_RIGHT, KC_RIGHT, KC_RIGHT,
 
         // remove RED
-        KC_BSPC, KC_BSPC, KC_BSPC,
+        KC_DEL, KC_DEL, KC_DEL,
 
         // write BLUE
         KC_CAPS,
         KC_B, KC_L, KC_U, KC_E,
+        KC_CAPS,
 
         // open menu
         KC_ESC,

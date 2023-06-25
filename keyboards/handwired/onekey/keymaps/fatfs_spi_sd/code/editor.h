@@ -9,10 +9,7 @@
 
 void editor_open(char *_filepath);
 
-void editor_move(uint16_t keycode);
-
-void editor_delete(void);
-void editor_write_char(char c);
+bool editor_handle(uint16_t keycode);
 
 void editor_needs_redraw(void);
 void editor_flush(painter_device_t device, painter_font_handle_t font);
