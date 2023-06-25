@@ -81,7 +81,7 @@ define handle_quantum_painter_driver
             $(DRIVER_PATH)/painter/tft_panel/qp_tft_panel.c \
             $(DRIVER_PATH)/painter/ili9xxx/qp_ili9341.c \
 
-	else ifeq ($$(strip $$(CURRENT_PAINTER_DRIVER)),ili9486_spi)
+    else ifeq ($$(strip $$(CURRENT_PAINTER_DRIVER)),ili9486_spi)
         QUANTUM_PAINTER_NEEDS_COMMS_SPI := yes
         QUANTUM_PAINTER_NEEDS_COMMS_SPI_DC_RESET := yes
         OPT_DEFS += -DQUANTUM_PAINTER_ILI9486_ENABLE -DQUANTUM_PAINTER_ILI9486_SPI_ENABLE

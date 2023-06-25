@@ -1,4 +1,5 @@
 // Copyright 2021 Nick Brassel (@tzarc)
+// Copyright 2023 Pablo Martinez (@elpekenin) <elpekenin@elpekenin.dev>
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 #include "qp_internal.h"
@@ -69,12 +70,81 @@ bool qp_ili9486_init(painter_device_t device, painter_rotation_t rotation) {
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Driver vtable
 
-static void qp_comms_spi_dc_reset_send_command_odd_cs_pulse(painter_device_t device, uint8_t cmd);
+// waveshare variant needs some tweaks due to shift registers
+static void qp_comms_spi_dc_reset_send_command_odd_cs_pulse(painter_device_t device, uint8_t cmd) {
+    painter_driver_t *              driver       = (painter_driver_t *)device;
+    qp_comms_spi_dc_reset_config_t *comms_config = (qp_comms_spi_dc_reset_config_t *)driver->comms_config;
+
+    writePinLow(comms_config->spi_config.chip_select_pin);
+    qp_comms_spi_dc_reset_send_command(device, cmd);
+    writePinHigh(comms_config->spi_config.chip_select_pin);
+}
+
+static uint32_t qp_comms_spi_send_data_odd_cs_pulse(painter_device_t device, const void *data, uint32_t byte_count) {
+    painter_driver_t *              driver       = (painter_driver_t *)device;
+    qp_comms_spi_dc_reset_config_t *comms_config = (qp_comms_spi_dc_reset_config_t *)driver->comms_config;
+
+    uint32_t       bytes_remaining = byte_count;
+    const uint8_t *p               = (const uint8_t *)data;
+    uint32_t       max_msg_length  = 1024;
+
+    writePinHigh(comms_config->dc_pin);
+    while (bytes_remaining > 0) {
+        uint32_t bytes_this_loop = QP_MIN(bytes_remaining, max_msg_length);
+        bool     odd_bytes       = bytes_this_loop & 1;
+
+        // send data
+        writePinLow(comms_config->spi_config.chip_select_pin);
+        spi_transmit(p, bytes_this_loop);
+        p += bytes_this_loop;
+
+        // extra CS toggle, for alignment
+        if (odd_bytes) {
+            writePinHigh(comms_config->spi_config.chip_select_pin);
+            writePinLow(comms_config->spi_config.chip_select_pin);
+        }
+
+        bytes_remaining -= bytes_this_loop;
+    }
+
+    return byte_count - bytes_remaining;
+}
+
+static uint32_t qp_ili9486_send_data_toggling(painter_device_t device, const uint8_t *data, uint32_t byte_count) {
+    painter_driver_t *              driver       = (painter_driver_t *)device;
+    qp_comms_spi_dc_reset_config_t *comms_config = (qp_comms_spi_dc_reset_config_t *)driver->comms_config;
+
+    uint32_t  ret;
+    for (uint8_t j = 0; j < byte_count; ++j) {
+        writePinLow(comms_config->spi_config.chip_select_pin);
+        ret = qp_comms_spi_dc_reset_send_data(device, &data[j], 1);
+        writePinHigh(comms_config->spi_config.chip_select_pin);
+    }
+
+    return ret;
+}
+
+static void qp_comms_spi_send_command_sequence_odd_cs_pulse(painter_device_t device, const uint8_t *sequence, size_t sequence_len) {
+    for (size_t i = 0; i < sequence_len;) {
+        uint8_t command   = sequence[i];
+        uint8_t delay     = sequence[i + 1];
+        uint8_t num_bytes = sequence[i + 2];
+
+        qp_comms_spi_dc_reset_send_command_odd_cs_pulse(device, command);
+        if (num_bytes > 0) {
+            qp_ili9486_send_data_toggling(device, &sequence[i + 3], num_bytes);
+        }
+
+        if (delay > 0) {
+            wait_ms(delay);
+        }
+        i += (3 + num_bytes);
+    }
+}
 
 static bool qp_ili9486_viewport(painter_device_t device, uint16_t left, uint16_t top, uint16_t right, uint16_t bottom) {
     painter_driver_t *                          driver       = (painter_driver_t *)device;
     tft_panel_dc_reset_painter_driver_vtable_t *vtable       = (tft_panel_dc_reset_painter_driver_vtable_t *)driver->driver_vtable;
-    qp_comms_spi_dc_reset_config_t *            comms_config = (qp_comms_spi_dc_reset_config_t *)driver->comms_config;
 
     // Fix up the drawing location if required
     left += driver->offset_x;
@@ -98,29 +168,46 @@ static bool qp_ili9486_viewport(painter_device_t device, uint16_t left, uint16_t
     // Set up the x-window
     uint8_t xbuf[4] = {left >> 8, left & 0xFF, right >> 8, right & 0xFF};
     qp_comms_spi_dc_reset_send_command_odd_cs_pulse(device, vtable->opcodes.set_column_address);
-    for (uint8_t i = 0; i < 4; ++i) {
-        writePinHigh(comms_config->dc_pin);
-        writePinLow(comms_config->spi_config.chip_select_pin);
-        spi_write(xbuf[i]);
-        writePinHigh(comms_config->spi_config.chip_select_pin);
-    }
+    qp_ili9486_send_data_toggling(device, xbuf, 4);
 
     // Set up the y-window
     uint8_t ybuf[4] = {top >> 8, top & 0xFF, bottom >> 8, bottom & 0xFF};
     qp_comms_spi_dc_reset_send_command_odd_cs_pulse(device, vtable->opcodes.set_row_address);
-    for (uint8_t i = 0; i < 4; ++i) {
-        writePinHigh(comms_config->dc_pin);
-        writePinLow(comms_config->spi_config.chip_select_pin);
-        spi_write(ybuf[i]);
-        writePinHigh(comms_config->spi_config.chip_select_pin);
-    }
+    qp_ili9486_send_data_toggling(device, ybuf, 4);
 
     // Lock in the window
     qp_comms_spi_dc_reset_send_command_odd_cs_pulse(device, vtable->opcodes.enable_writes);
     return true;
 }
 
+// Regular
 const tft_panel_dc_reset_painter_driver_vtable_t ili9486_driver_vtable = {
+    .base =
+        {
+            .init            = qp_ili9486_init,
+            .power           = qp_tft_panel_power,
+            .clear           = qp_tft_panel_clear,
+            .flush           = qp_tft_panel_flush,
+            .pixdata         = qp_tft_panel_pixdata,
+            .viewport        = qp_tft_panel_viewport,
+            .palette_convert = qp_tft_panel_palette_convert_rgb565_swapped,
+            .append_pixels   = qp_tft_panel_append_pixels_rgb565,
+            .append_pixdata  = qp_tft_panel_append_pixdata,
+        },
+    .num_window_bytes   = 2,
+    .swap_window_coords = false,
+    .opcodes =
+        {
+            .display_on         = ILI9XXX_CMD_DISPLAY_ON,
+            .display_off        = ILI9XXX_CMD_DISPLAY_OFF,
+            .set_column_address = ILI9XXX_SET_COL_ADDR,
+            .set_row_address    = ILI9XXX_SET_PAGE_ADDR,
+            .enable_writes      = ILI9XXX_SET_MEM,
+        },
+};
+
+// Waveshare tweaks
+const tft_panel_dc_reset_painter_driver_vtable_t ili9486_waveshare_driver_vtable = {
     .base =
         {
             .init            = qp_ili9486_init,
@@ -144,78 +231,6 @@ const tft_panel_dc_reset_painter_driver_vtable_t ili9486_driver_vtable = {
             .enable_writes      = ILI9XXX_SET_MEM,
         },
 };
-
-static void qp_comms_spi_dc_reset_send_command_odd_cs_pulse(painter_device_t device, uint8_t cmd) {
-    painter_driver_t *              driver       = (painter_driver_t *)device;
-    qp_comms_spi_dc_reset_config_t *comms_config = (qp_comms_spi_dc_reset_config_t *)driver->comms_config;
-
-    writePinLow(comms_config->dc_pin);
-    writePinLow(comms_config->spi_config.chip_select_pin);
-    spi_write(cmd);
-    writePinHigh(comms_config->spi_config.chip_select_pin);
-}
-
-static uint32_t qp_comms_spi_send_data_odd_cs_pulse(painter_device_t device, const void *data, uint32_t byte_count) {
-    painter_driver_t *              driver       = (painter_driver_t *)device;
-    qp_comms_spi_dc_reset_config_t *comms_config = (qp_comms_spi_dc_reset_config_t *)driver->comms_config;
-
-    uint32_t       bytes_remaining = byte_count;
-    const uint8_t *p               = (const uint8_t *)data;
-    uint32_t       max_msg_length  = 1024;
-
-    writePinHigh(comms_config->dc_pin);
-    while (bytes_remaining > 0) {
-        uint32_t bytes_this_loop = QP_MIN(bytes_remaining, max_msg_length);
-        bool     odd_bytes       = bytes_this_loop & 1;
-
-        writePinLow(comms_config->spi_config.chip_select_pin);
-        if (!odd_bytes) {
-            // even bytes, just send
-            spi_transmit(p, bytes_this_loop);
-            p += bytes_this_loop;
-        } else {
-            // send even bytes
-            writePinLow(comms_config->spi_config.chip_select_pin);
-            spi_transmit(p, bytes_this_loop - 1);
-            p += (bytes_this_loop - 1);
-
-            // last byte
-            spi_write(*p);
-            p++;
-
-            // extra CS toggle
-            writePinHigh(comms_config->spi_config.chip_select_pin);
-            writePinLow(comms_config->spi_config.chip_select_pin);
-        }
-
-        bytes_remaining -= bytes_this_loop;
-    }
-
-    return byte_count - bytes_remaining;
-}
-
-static void qp_comms_spi_send_command_sequence_odd_cs_pulse(painter_device_t device, const uint8_t *sequence, size_t sequence_len) {
-    painter_driver_t *              driver       = (painter_driver_t *)device;
-    qp_comms_spi_dc_reset_config_t *comms_config = (qp_comms_spi_dc_reset_config_t *)driver->comms_config;
-
-    for (size_t i = 0; i < sequence_len;) {
-        uint8_t command   = sequence[i];
-        uint8_t delay     = sequence[i + 1];
-        uint8_t num_bytes = sequence[i + 2];
-
-        qp_comms_spi_dc_reset_send_command_odd_cs_pulse(device, command);
-        for (uint8_t j = 0; j < num_bytes; ++j) {
-            writePinHigh(comms_config->dc_pin);
-            writePinLow(comms_config->spi_config.chip_select_pin);
-            spi_write(sequence[i + 3 + j]);
-            writePinHigh(comms_config->spi_config.chip_select_pin);
-        }
-        if (delay > 0) {
-            wait_ms(delay);
-        }
-        i += (3 + num_bytes);
-    }
-}
 
 static const painter_comms_with_command_vtable_t spi_comms_odd_cs_pulse_vtable = {
     .base =
@@ -272,11 +287,11 @@ painter_device_t qp_ili9486_make_spi_waveshare_device(uint16_t panel_width, uint
     painter_device_t device = qp_ili9486_make_spi_device(panel_width, panel_height, chip_select_pin, dc_pin, reset_pin, spi_divisor, spi_mode);
     if (device) {
         tft_panel_dc_reset_painter_device_t *driver = (tft_panel_dc_reset_painter_device_t *)device;
-        driver->base.comms_vtable = (const painter_comms_vtable_t *)&spi_comms_odd_cs_pulse_vtable;
+        driver->base.driver_vtable                  = (const painter_driver_vtable_t *)&ili9486_waveshare_driver_vtable;
+        driver->base.comms_vtable                   = (const painter_comms_vtable_t *)&spi_comms_odd_cs_pulse_vtable;
     }
     return device;
 }
-
 
 #endif // QUANTUM_PAINTER_ILI9486_SPI_ENABLE
 

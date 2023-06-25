@@ -453,6 +453,8 @@ int16_t qp_drawtext(painter_device_t device, uint16_t x, uint16_t y, painter_fon
  */
 int16_t qp_drawtext_recolor(painter_device_t device, uint16_t x, uint16_t y, painter_font_handle_t font, const char *str, uint8_t hue_fg, uint8_t sat_fg, uint8_t val_fg, uint8_t hue_bg, uint8_t sat_bg, uint8_t val_bg);
 
+painter_device_t qp_get_device(uint8_t device_id);
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Quantum Painter Drivers
 
@@ -509,8 +511,6 @@ int16_t qp_drawtext_recolor(painter_device_t device, uint16_t x, uint16_t y, pai
 #else // QUANTUM_PAINTER_SSD1351_ENABLE
 #    define SSD1351_NUM_DEVICES 0
 #endif // QUANTUM_PAINTER_SSD1351_ENABLE
-
-painter_device_t qp_get_device(uint8_t device_id);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Quantum Painter Extras

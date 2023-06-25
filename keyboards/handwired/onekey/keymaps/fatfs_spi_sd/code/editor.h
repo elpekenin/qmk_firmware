@@ -7,8 +7,8 @@
 
 #include "code/input.h"
 
-#ifndef TABSIZE
-#    define TABSIZE 4
+#ifndef TAB_SIZE
+#    define TAB_SIZE 4
 #endif // TABSIZE
 
 void editor_open(char *_filepath);
