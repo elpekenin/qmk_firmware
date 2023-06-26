@@ -125,57 +125,77 @@ static int fatfs_read_file_impl(lua_State *L) {
     return 1;
 }
 
-static void register_colors(void) {
-    // TODO: More dynamic (code-gen?)
-    HSV  colors[] = {{HSV_RED}, {HSV_BLUE}};
-    char *names[] = {"HSV_RED", "HSV_BLUE"};
+// ==================================================================
+// Constants
+static void __register_color(HSV color, char *name) {
+    // create table for {h, s, v}
+    lua_newtable(L);
 
-    for (uint8_t i = 0; i < ARRAY_SIZE(colors); ++i) {
-        HSV color = colors[i];
+    // fill it with values
+    lua_pushinteger(L, color.h);
+    lua_seti(L, -2, 1);
 
-        // create table for {h, s, v}
-        lua_newtable(L);
+    lua_pushinteger(L, color.s);
+    lua_seti(L, -2, 2);
 
-        // fill it with values
-        lua_pushinteger(L, color.h);
-        lua_seti(L, -2, 1);
+    lua_pushinteger(L, color.v);
+    lua_seti(L, -2, 3);
 
-        lua_pushinteger(L, color.s);
-        lua_seti(L, -2, 2);
-
-        lua_pushinteger(L, color.v);
-        lua_seti(L, -2, 3);
-
-        // set the global name
-        lua_setglobal(L, names[i]);
-    }
+    // set the global name
+    lua_setglobal(L, name);
 }
 
-static int lua_qp_rect(lua_State *L) {
-    const uint8_t  device_id = luaL_checkinteger(L, 1);
-    const uint16_t left      = luaL_checkinteger(L, 2);
-    const uint16_t top       = luaL_checkinteger(L, 3);
-    const uint16_t right     = luaL_checkinteger(L, 4);
-    const uint16_t bottom    = luaL_checkinteger(L, 5);
-    const bool     filled    = lua_toboolean(L, 7);
+#define register_color(name) __register_color((HSV){name}, #name)
 
-    // unpack color table
-    lua_geti(L, 6, 1);
-    lua_geti(L, 6, 2);
-    lua_geti(L, 6, 3);
-    const uint8_t hue = lua_tointeger(L, -3);
-    const uint8_t sat = lua_tointeger(L, -2);
-    const uint8_t val = lua_tointeger(L, -1);
+static void register_colors(void) {
+    register_color(HSV_AZURE);
+    register_color(HSV_BLACK);
+    register_color(HSV_BLUE);
+    register_color(HSV_CHARTREUSE);
+    register_color(HSV_CORAL);
+    register_color(HSV_CYAN);
+    register_color(HSV_GOLD);
+    register_color(HSV_GOLDENROD);
+    register_color(HSV_GREEN);
+    register_color(HSV_MAGENTA);
+    register_color(HSV_ORANGE);
+    register_color(HSV_PINK);
+    register_color(HSV_PURPLE);
+    register_color(HSV_RED);
+    register_color(HSV_SPRINGGREEN);
+    register_color(HSV_TEAL);
+    register_color(HSV_TURQUOISE);
+    register_color(HSV_WHITE);
+    register_color(HSV_YELLOW);
+    register_color(HSV_OFF);
+}
+
+// ==================================================================
+// QP-Lua bindings
+static int lua_qp_clear(lua_State *L) {
+    const int device_id = luaL_checkinteger(L, 1);
 
     painter_device_t device = qp_get_device(device_id);
-    qp_rect(device, left, top, right, bottom, hue, sat, val, filled);
+
+    qp_clear(device);
+
+    return 0;
+}
+
+static int lua_qp_flush(lua_State *L) {
+    const int device_id = luaL_checkinteger(L, 1);
+
+    painter_device_t device = qp_get_device(device_id);
+
+    qp_flush(device);
 
     return 0;
 }
 
 static int lua_qp_get_geometry(lua_State *L) {
-    const int        device_id = luaL_checkinteger(L, 1);
-    painter_device_t device    = qp_get_device(device_id);
+    const int device_id = luaL_checkinteger(L, 1);
+
+    painter_device_t device = qp_get_device(device_id);
 
     uint16_t width, height;
     painter_rotation_t rotation;
@@ -202,6 +222,269 @@ static int lua_qp_get_geometry(lua_State *L) {
     return 1;
 }
 
+static int lua_qp_setpixel(lua_State *L) {
+    const uint8_t  device_id = luaL_checkinteger(L, 1);
+    const uint16_t x         = luaL_checkinteger(L, 2);
+    const uint16_t y         = luaL_checkinteger(L, 3);
+
+    // unpack color table
+    lua_geti(L, 4, 1);
+    lua_geti(L, 4, 2);
+    lua_geti(L, 4, 3);
+    const uint8_t hue = lua_tointeger(L, -3);
+    const uint8_t sat = lua_tointeger(L, -2);
+    const uint8_t val = lua_tointeger(L, -1);
+    lua_pop(L, 3);
+
+    painter_device_t device = qp_get_device(device_id);
+
+    qp_setpixel(device, x, y, hue, sat, val);
+
+    return 0;
+}
+
+static int lua_qp_line(lua_State *L) {
+    const uint8_t  device_id = luaL_checkinteger(L, 1);
+    const uint16_t x0        = luaL_checkinteger(L, 2);
+    const uint16_t y0        = luaL_checkinteger(L, 3);
+    const uint16_t x1        = luaL_checkinteger(L, 4);
+    const uint16_t y1        = luaL_checkinteger(L, 5);
+
+    // unpack color table
+    lua_geti(L, 6, 1);
+    lua_geti(L, 6, 2);
+    lua_geti(L, 6, 3);
+    const uint8_t hue = lua_tointeger(L, -3);
+    const uint8_t sat = lua_tointeger(L, -2);
+    const uint8_t val = lua_tointeger(L, -1);
+    lua_pop(L, 3);
+
+    painter_device_t device = qp_get_device(device_id);
+
+    qp_line(device, x0, y0, x1, y1, hue, sat, val);
+
+    return 0;
+}
+
+static int lua_qp_rect(lua_State *L) {
+    const uint8_t  device_id = luaL_checkinteger(L, 1);
+    const uint16_t left      = luaL_checkinteger(L, 2);
+    const uint16_t top       = luaL_checkinteger(L, 3);
+    const uint16_t right     = luaL_checkinteger(L, 4);
+    const uint16_t bottom    = luaL_checkinteger(L, 5);
+    const bool     filled    = lua_toboolean(L, 7);
+
+    // unpack color table
+    lua_geti(L, 6, 1);
+    lua_geti(L, 6, 2);
+    lua_geti(L, 6, 3);
+    const uint8_t hue = lua_tointeger(L, -3);
+    const uint8_t sat = lua_tointeger(L, -2);
+    const uint8_t val = lua_tointeger(L, -1);
+    lua_pop(L, 3);
+
+    painter_device_t device = qp_get_device(device_id);
+
+    qp_rect(device, left, top, right, bottom, hue, sat, val, filled);
+
+    return 0;
+}
+
+static int lua_qp_circle(lua_State *L) {
+    const uint8_t  device_id = luaL_checkinteger(L, 1);
+    const uint16_t x         = luaL_checkinteger(L, 2);
+    const uint16_t y         = luaL_checkinteger(L, 3);
+    const uint16_t radius    = luaL_checkinteger(L, 4);
+    const uint16_t filled    = luaL_checkinteger(L, 6);
+
+    // unpack color table
+    lua_geti(L, 5, 1);
+    lua_geti(L, 5, 2);
+    lua_geti(L, 5, 3);
+    const uint8_t hue = lua_tointeger(L, -3);
+    const uint8_t sat = lua_tointeger(L, -2);
+    const uint8_t val = lua_tointeger(L, -1);
+    lua_pop(L, 3);
+
+    painter_device_t device = qp_get_device(device_id);
+
+    qp_circle(device, x, y, radius, hue, sat, val, filled);
+
+    return 0;
+}
+
+static int lua_qp_ellipse(lua_State *L) {
+    const uint8_t  device_id = luaL_checkinteger(L, 1);
+    const uint16_t x         = luaL_checkinteger(L, 2);
+    const uint16_t y         = luaL_checkinteger(L, 3);
+    const uint16_t sizex     = luaL_checkinteger(L, 4);
+    const uint16_t sizey     = luaL_checkinteger(L, 5);
+    const uint16_t filled    = luaL_checkinteger(L, 7);
+
+    // unpack color table
+    lua_geti(L, 6, 1);
+    lua_geti(L, 6, 2);
+    lua_geti(L, 6, 3);
+    const uint8_t hue = lua_tointeger(L, -3);
+    const uint8_t sat = lua_tointeger(L, -2);
+    const uint8_t val = lua_tointeger(L, -1);
+    lua_pop(L, 3);
+
+    painter_device_t device = qp_get_device(device_id);
+
+    qp_ellipse(device, x, y, sizex, sizey, hue, sat, val, filled);
+
+    return 0;
+}
+
+static int lua_qp_drawimage_recolor(lua_State *L) {
+    const uint8_t  device_id = luaL_checkinteger(L, 1);
+    const uint16_t x         = luaL_checkinteger(L, 2);
+    const uint16_t y         = luaL_checkinteger(L, 3);
+    const uint8_t  image_id  = luaL_checkinteger(L, 4);
+
+    // unpack color tables
+    lua_geti(L, 5, 1);
+    lua_geti(L, 5, 2);
+    lua_geti(L, 5, 3);
+    const uint8_t hue_fg = lua_tointeger(L, -3);
+    const uint8_t sat_fg = lua_tointeger(L, -2);
+    const uint8_t val_fg = lua_tointeger(L, -1);
+    lua_pop(L, 3);
+
+    lua_geti(L, 6, 1);
+    lua_geti(L, 6, 2);
+    lua_geti(L, 6, 3);
+    const uint8_t hue_bg = lua_tointeger(L, -3);
+    const uint8_t sat_bg = lua_tointeger(L, -2);
+    const uint8_t val_bg = lua_tointeger(L, -1);
+    lua_pop(L, 3);
+
+    painter_device_t       device = qp_get_device(device_id);
+    painter_image_handle_t image  = qp_get_image(image_id);
+
+    qp_drawimage_recolor(device, x, y, image, hue_fg, sat_fg, val_fg, hue_bg, sat_bg, val_bg);
+
+    return 0;
+}
+
+// just a wrapper injecting black and white
+static int lua_qp_drawimage(lua_State *L) {
+    // getglobal pushes the variable to the top of the stack
+    // as if they were 2 extra args, perfect!!
+    lua_getglobal(L, "HSV_WHITE");
+    lua_getglobal(L, "HSV_BLACK");
+
+    return lua_qp_drawimage_recolor(L);
+}
+
+static int lua_qp_animate_recolor(lua_State *L) {
+    const uint8_t  device_id = luaL_checkinteger(L, 1);
+    const uint16_t x         = luaL_checkinteger(L, 2);
+    const uint16_t y         = luaL_checkinteger(L, 3);
+    const uint8_t  image_id  = luaL_checkinteger(L, 4);
+
+    // unpack color tables
+    lua_geti(L, 5, 1);
+    lua_geti(L, 5, 2);
+    lua_geti(L, 5, 3);
+    const uint8_t hue_fg = lua_tointeger(L, -3);
+    const uint8_t sat_fg = lua_tointeger(L, -2);
+    const uint8_t val_fg = lua_tointeger(L, -1);
+    lua_pop(L, 3);
+
+    lua_geti(L, 6, 1);
+    lua_geti(L, 6, 2);
+    lua_geti(L, 6, 3);
+    const uint8_t hue_bg = lua_tointeger(L, -3);
+    const uint8_t sat_bg = lua_tointeger(L, -2);
+    const uint8_t val_bg = lua_tointeger(L, -1);
+    lua_pop(L, 3);
+
+    painter_device_t       device = qp_get_device(device_id);
+    painter_image_handle_t image  = qp_get_image(image_id);
+
+    deferred_token token = qp_animate_recolor(device, x, y, image, hue_fg, sat_fg, val_fg, hue_bg, sat_bg, val_bg);
+    lua_pushinteger(L, token);
+
+    return 1;
+}
+
+// just a wrapper injecting black and white
+static int lua_qp_animate(lua_State *L) {
+    // getglobal pushes the variable to the top of the stack
+    // as if they were 2 extra args, perfect!!
+    lua_getglobal(L, "HSV_WHITE");
+    lua_getglobal(L, "HSV_BLACK");
+
+    return lua_qp_animate_recolor(L);
+}
+
+static int lua_qp_stop_animation(lua_State *L) {
+    const deferred_token token = luaL_checkinteger(L, 1);
+
+    qp_stop_animation(token);
+
+    return 0;
+}
+
+static int lua_qp_textwidth(lua_State *L) {
+    const uint8_t font_id = luaL_checkinteger(L, 1);
+    const char *  text    = luaL_checkstring(L, 2);
+
+    painter_font_handle_t font = qp_get_font(font_id);
+
+    int16_t width = qp_textwidth(font, text);
+    lua_pushinteger(L, width);
+
+    return 1;
+}
+
+static int lua_qp_drawtext_recolor(lua_State *L) {
+    const uint8_t  device_id = luaL_checkinteger(L, 1);
+    const uint16_t x         = luaL_checkinteger(L, 2);
+    const uint16_t y         = luaL_checkinteger(L, 3);
+    const uint8_t  font_id   = luaL_checkinteger(L, 4);
+    const char *   text      = luaL_checkstring(L, 5);
+
+    // unpack color tables
+    lua_geti(L, 6, 1);
+    lua_geti(L, 6, 2);
+    lua_geti(L, 6, 3);
+    const uint8_t hue_fg = lua_tointeger(L, -3);
+    const uint8_t sat_fg = lua_tointeger(L, -2);
+    const uint8_t val_fg = lua_tointeger(L, -1);
+    lua_pop(L, 3);
+
+    lua_geti(L, 7, 1);
+    lua_geti(L, 7, 2);
+    lua_geti(L, 7, 3);
+    const uint8_t hue_bg = lua_tointeger(L, -3);
+    const uint8_t sat_bg = lua_tointeger(L, -2);
+    const uint8_t val_bg = lua_tointeger(L, -1);
+    lua_pop(L, 3);
+
+    painter_device_t       device = qp_get_device(device_id);
+    painter_font_handle_t  font   = qp_get_font(font_id);
+
+    int16_t width = qp_drawtext_recolor(device, x, y, font, text, hue_fg, sat_fg, val_fg, hue_bg, sat_bg, val_bg);
+    lua_pushinteger(L, width);
+
+    return 1;
+}
+
+// just a wrapper injecting black and white
+static int lua_qp_drawtext(lua_State *L) {
+    // getglobal pushes the variable to the top of the stack
+    // as if they were 2 extra args, perfect!!
+    lua_getglobal(L, "HSV_WHITE");
+    lua_getglobal(L, "HSV_BLACK");
+
+    return lua_qp_drawtext_recolor(L);
+}
+
+// ==================================================================
+// C-API of this file
 void lua_setup(void) {
     create_files();
 
@@ -223,8 +506,27 @@ void lua_setup(void) {
     register_colors();
 
     // QP bindings
-    lua_register(L, "qp_rect", lua_qp_rect);
-    lua_register(L, "qp_get_geometry", lua_qp_get_geometry);
+    #define QP_LUA_REGISTER(func) lua_register(L, #func, lua_##func)
+
+    QP_LUA_REGISTER(qp_clear);
+    QP_LUA_REGISTER(qp_flush);
+    QP_LUA_REGISTER(qp_get_geometry);
+
+    QP_LUA_REGISTER(qp_setpixel);
+    QP_LUA_REGISTER(qp_line);
+    QP_LUA_REGISTER(qp_rect);
+    QP_LUA_REGISTER(qp_circle);
+    QP_LUA_REGISTER(qp_ellipse);
+
+    QP_LUA_REGISTER(qp_drawimage);
+    QP_LUA_REGISTER(qp_drawimage_recolor);
+    QP_LUA_REGISTER(qp_animate);
+    QP_LUA_REGISTER(qp_animate_recolor);
+    QP_LUA_REGISTER(qp_stop_animation);
+
+    QP_LUA_REGISTER(qp_textwidth);
+    QP_LUA_REGISTER(qp_drawtext);
+    QP_LUA_REGISTER(qp_drawtext_recolor);
 }
 
 void lua_exec(char *filepath) {

@@ -461,3 +461,9 @@ int16_t qp_drawtext_recolor(painter_device_t device, uint16_t x, uint16_t y, pai
     qp_comms_stop(device);
     return ret ? (state.xpos - x) : 0;
 }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Quantum Painter External API: qp_get_font
+painter_font_handle_t qp_get_font(uint8_t font_id) {
+    return (painter_font_handle_t)&font_descriptors[font_id];
+}
