@@ -15,7 +15,8 @@ void editor_open(char *_filepath);
 
 bool editor_handle(uint16_t keycode);
 
-void editor_needs_redraw(void);
+void editor_text_needs_redraw(void);
+void editor_menu_needs_redraw(void);
 void editor_flush(painter_device_t device, painter_font_handle_t font);
 
 void editor_menu_selection(void);

@@ -28,7 +28,7 @@ uint16_t mock_press(void) {
         OPEN_EDITOR,
 
         // file
-        KC_H, KC_O, KC_U, KC_S, KC_E,
+        KC_Q, KC_P, KC_UNDERSCORE, KC_T, KC_E, KC_S, KC_T,
 
         // .lua
         KC_DOT, KC_L, KC_U, KC_A,
@@ -36,28 +36,11 @@ uint16_t mock_press(void) {
         // confirm
         KC_ENT,
 
-        // get to the line
-        KC_DOWN, KC_DOWN, KC_DOWN, KC_DOWN, KC_DOWN, KC_DOWN, KC_DOWN, KC_DOWN, KC_DOWN, KC_DOWN, KC_DOWN,
-
-        // indentation
-        KC_RIGHT, KC_RIGHT, KC_RIGHT, KC_RIGHT, KC_RIGHT, KC_RIGHT, KC_RIGHT, KC_RIGHT,
-
-        // HSV_
-        KC_RIGHT, KC_RIGHT, KC_RIGHT, KC_RIGHT,
-
-        // remove RED
-        KC_DEL, KC_DEL, KC_DEL,
-
-        // write BLUE
-        KC_CAPS,
-        KC_B, KC_L, KC_U, KC_E,
-        KC_CAPS,
-
         // open menu
         KC_ESC,
 
-        // save
-        KC_W,
+        // save and run
+        KC_W, KC_E,
 
         // confirm
         KC_ENT
@@ -81,7 +64,8 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
         return false;
     }
 
-    return process_input_mode(keycode, record);
+    process_input_mode(keycode, record);
+    return false;
 }
 
 uint32_t deferred_init(uint32_t t, void* cb_arg) {
@@ -96,8 +80,6 @@ uint32_t deferred_init(uint32_t t, void* cb_arg) {
     qp_init(device, QP_ROTATION_180);
 
     font = qp_load_font_mem(font_fira_code);
-
-    lua_exec("qp_test.lua");
 
     return 0;
 }
@@ -115,7 +97,7 @@ void housekeeping_task_user(void) {
         return;
     }
 
-    // editor_flush(device, font);
+    editor_flush(device, font);
 
     // static uint16_t timer = 0;
     // if (timer_elapsed(timer) < 5000) {

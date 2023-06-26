@@ -12,6 +12,29 @@
 
 static lua_State *L;
 
+// Helping macros
+#define LUA_REGISTER(func) lua_register(L, #func, lua_##func)
+#define REGISTER_COLOR(name) _register_color((HSV){name}, #name)
+
+static void _register_color(HSV color, char *name) {
+    // create table for {h, s, v}
+    lua_newtable(L);
+
+    // fill it with values
+    lua_pushinteger(L, color.h);
+    lua_seti(L, -2, 1);
+
+    lua_pushinteger(L, color.s);
+    lua_seti(L, -2, 2);
+
+    lua_pushinteger(L, color.v);
+    lua_seti(L, -2, 3);
+
+    // set the global name
+    lua_setglobal(L, name);
+}
+
+
 static void create_files(void) {
     // example function to be `exec`
     write(
@@ -138,11 +161,11 @@ static int exec_impl(lua_State *L) {
     return 0;
 }
 
-static int fatfs_read_file_impl(lua_State *L) {
+static int lua_fatfs_read_file(lua_State *L) {
     const char *filepath = luaL_checkstring(L, 1);
 
     if (filepath == NULL) {
-        printf("fatfs_read_file_impl: error (filepath was empty)\n");
+        printf("lua_fatfs_read_file: error (filepath was empty)\n");
         lua_pushnil(L);
         return 1;
     }
@@ -155,47 +178,27 @@ static int fatfs_read_file_impl(lua_State *L) {
 
 // ==================================================================
 // Constants
-static void __register_color(HSV color, char *name) {
-    // create table for {h, s, v}
-    lua_newtable(L);
-
-    // fill it with values
-    lua_pushinteger(L, color.h);
-    lua_seti(L, -2, 1);
-
-    lua_pushinteger(L, color.s);
-    lua_seti(L, -2, 2);
-
-    lua_pushinteger(L, color.v);
-    lua_seti(L, -2, 3);
-
-    // set the global name
-    lua_setglobal(L, name);
-}
-
-#define register_color(name) __register_color((HSV){name}, #name)
-
 static void register_colors(void) {
-    register_color(HSV_AZURE);
-    register_color(HSV_BLACK);
-    register_color(HSV_BLUE);
-    register_color(HSV_CHARTREUSE);
-    register_color(HSV_CORAL);
-    register_color(HSV_CYAN);
-    register_color(HSV_GOLD);
-    register_color(HSV_GOLDENROD);
-    register_color(HSV_GREEN);
-    register_color(HSV_MAGENTA);
-    register_color(HSV_ORANGE);
-    register_color(HSV_PINK);
-    register_color(HSV_PURPLE);
-    register_color(HSV_RED);
-    register_color(HSV_SPRINGGREEN);
-    register_color(HSV_TEAL);
-    register_color(HSV_TURQUOISE);
-    register_color(HSV_WHITE);
-    register_color(HSV_YELLOW);
-    register_color(HSV_OFF);
+    REGISTER_COLOR(HSV_AZURE);
+    REGISTER_COLOR(HSV_BLACK);
+    REGISTER_COLOR(HSV_BLUE);
+    REGISTER_COLOR(HSV_CHARTREUSE);
+    REGISTER_COLOR(HSV_CORAL);
+    REGISTER_COLOR(HSV_CYAN);
+    REGISTER_COLOR(HSV_GOLD);
+    REGISTER_COLOR(HSV_GOLDENROD);
+    REGISTER_COLOR(HSV_GREEN);
+    REGISTER_COLOR(HSV_MAGENTA);
+    REGISTER_COLOR(HSV_ORANGE);
+    REGISTER_COLOR(HSV_PINK);
+    REGISTER_COLOR(HSV_PURPLE);
+    REGISTER_COLOR(HSV_RED);
+    REGISTER_COLOR(HSV_SPRINGGREEN);
+    REGISTER_COLOR(HSV_TEAL);
+    REGISTER_COLOR(HSV_TURQUOISE);
+    REGISTER_COLOR(HSV_WHITE);
+    REGISTER_COLOR(HSV_YELLOW);
+    REGISTER_COLOR(HSV_OFF);
 }
 
 // ==================================================================
@@ -525,7 +528,7 @@ void lua_setup(void) {
     }
 
     // Add fatfs_read_file binding
-    lua_register(L, "fatfs_read_file", fatfs_read_file_impl);
+    LUA_REGISTER(fatfs_read_file);
 
     // add exec binding
     lua_register(L, "exec", exec_impl);
@@ -533,28 +536,27 @@ void lua_setup(void) {
     // colors
     register_colors();
 
-    // QP bindings
-    #define QP_LUA_REGISTER(func) lua_register(L, #func, lua_##func)
 
-    QP_LUA_REGISTER(qp_clear);
-    QP_LUA_REGISTER(qp_flush);
-    QP_LUA_REGISTER(qp_get_geometry);
-
-    QP_LUA_REGISTER(qp_setpixel);
-    QP_LUA_REGISTER(qp_line);
-    QP_LUA_REGISTER(qp_rect);
-    QP_LUA_REGISTER(qp_circle);
-    QP_LUA_REGISTER(qp_ellipse);
-
-    QP_LUA_REGISTER(qp_drawimage);
-    QP_LUA_REGISTER(qp_drawimage_recolor);
-    QP_LUA_REGISTER(qp_animate);
-    QP_LUA_REGISTER(qp_animate_recolor);
-    QP_LUA_REGISTER(qp_stop_animation);
-
-    QP_LUA_REGISTER(qp_textwidth);
-    QP_LUA_REGISTER(qp_drawtext);
-    QP_LUA_REGISTER(qp_drawtext_recolor);
+    // ===== QP bindings
+    // primitives
+    LUA_REGISTER(qp_clear);
+    LUA_REGISTER(qp_flush);
+    LUA_REGISTER(qp_get_geometry);
+    LUA_REGISTER(qp_setpixel);
+    LUA_REGISTER(qp_line);
+    LUA_REGISTER(qp_rect);
+    LUA_REGISTER(qp_circle);
+    LUA_REGISTER(qp_ellipse);
+    // images
+    LUA_REGISTER(qp_drawimage);
+    LUA_REGISTER(qp_drawimage_recolor);
+    LUA_REGISTER(qp_animate);
+    LUA_REGISTER(qp_animate_recolor);
+    LUA_REGISTER(qp_stop_animation);
+    // text
+    LUA_REGISTER(qp_textwidth);
+    LUA_REGISTER(qp_drawtext);
+    LUA_REGISTER(qp_drawtext_recolor);
 }
 
 void lua_exec(char *filepath) {

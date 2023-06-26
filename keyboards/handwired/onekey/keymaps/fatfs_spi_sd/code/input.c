@@ -47,6 +47,9 @@ char keycode_to_char(uint16_t keycode) {
         case KC_MINUS:
             return '-';
 
+        case KC_UNDERSCORE:
+            return '_';
+
         case KC_SPC:
             return ' ';
 
@@ -64,7 +67,7 @@ static bool append_to_input(uint16_t keycode) {
     }
 
     user_input_append(c);
-    editor_needs_redraw();
+    editor_menu_needs_redraw();
 
     return true;
 }
@@ -86,7 +89,7 @@ bool path_handler(uint16_t keycode, keyrecord_t *record) {
             input_mode = NONE;
 
             clear_user_input();
-            editor_needs_redraw();
+            editor_menu_needs_redraw();
 
             return false;
 
@@ -107,7 +110,7 @@ bool edit_handler(uint16_t keycode, keyrecord_t *record) {
     switch (keycode) {
         case KC_ESC:
             input_mode = MENU;
-            editor_needs_redraw();
+            editor_menu_needs_redraw();
             return false;
 
         default:
@@ -120,7 +123,7 @@ bool menu_handler(uint16_t keycode, keyrecord_t *record) {
         case KC_ESC:
             input_mode = EDIT;
             clear_user_input();
-            editor_needs_redraw();
+            editor_menu_needs_redraw();
             return false;
 
         case KC_ENT:
