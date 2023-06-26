@@ -14,7 +14,10 @@ static FIL* Fil = &_Fil;
 static char read_buff[READ_BUFFER_SIZE] = {0};
 
 void mount(void) {
-    f_mount(&FatFs, "", 0);
+    FRESULT fr = f_mount(&FatFs, "", 0);
+    if (fr != FR_OK) {
+        printf("ERROR: couldnt mount, fr=%d\n", fr);
+    }
 }
 
 char *read(char *path, UINT btr) {
