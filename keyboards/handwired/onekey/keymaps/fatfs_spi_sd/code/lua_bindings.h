@@ -10,3 +10,6 @@ void lua_setup(void);
 void lua_exec(char *filepath);
 
 void lua_kill(void);
+
+void lua_game_start(char *filepath);
+void lua_game_tick(char *filepath, char *direction);

@@ -19,10 +19,25 @@
 
 #define QUANTUM_PAINTER_DISPLAY_TIMEOUT 0
 
-#define READ_BUFFER_SIZE 1024
+#define READ_BUFFER_SIZE 10000
 
-#define TEXT_BUFFER_LEN 1000
+#define TEXT_BUFFER_LEN READ_BUFFER_SIZE
 #define TEMP_BUFF_LEN 50
 #define INPUT_BUF_LEN 20
 
 #define OPEN_EDITOR QK_USER
+
+#define lua_writestring(s, l)   \
+    do {                        \
+        printf("LUA print ||"); \
+        printf(s);              \
+        printf("\n");           \
+    } while (0)
+
+#define lua_writeline() printf("\n")
+
+#define lua_writestringerror(s, p) \
+    do {                           \
+        printf("LUA ERROR ||");    \
+        printf(s "\n", p);         \
+    } while (0)

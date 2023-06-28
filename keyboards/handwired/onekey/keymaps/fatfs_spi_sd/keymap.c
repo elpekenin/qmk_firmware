@@ -74,6 +74,7 @@ uint32_t deferred_init(uint32_t t, void* cb_arg) {
 
     // Lua
     lua_setup();
+    lua_game_start("snake.lua");
 
     // Quantum Painter
     device = qp_ili9486_make_spi_waveshare_device(320, 480, ILI9486_CS_PIN, DC_PIN, RST_PIN, SPI_DIV, SPI_MODE);
@@ -97,13 +98,15 @@ void housekeeping_task_user(void) {
         return;
     }
 
-    editor_flush(device, font);
+    // editor_flush(device, font);
 
-    // static uint16_t timer = 0;
-    // if (timer_elapsed(timer) < 5000) {
-    //     return;
-    // }
-    // timer = timer_read();
+    static uint16_t timer = 0;
+    if (timer_elapsed(timer) < 1000) {
+        return;
+    }
+    timer = timer_read();
+
+    lua_game_tick("snake.lua", "d");
 
     // lua_exec("house.lua");
 }

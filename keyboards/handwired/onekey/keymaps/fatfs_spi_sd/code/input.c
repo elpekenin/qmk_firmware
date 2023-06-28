@@ -8,11 +8,7 @@
 static input_mode_t input_mode = NONE;
 
 static uint8_t user_input_index;
-static char user_input[INPUT_BUF_LEN + 1] = {0};
-static void clear_user_input(void) {
-    user_input_index = 0;
-    memset(user_input, 0, INPUT_BUF_LEN);
-}
+static char user_input[INPUT_BUF_LEN] = {0};
 
 static void user_input_append(char c) {
     user_input[user_input_index++] = c;
@@ -88,7 +84,7 @@ bool path_handler(uint16_t keycode, keyrecord_t *record) {
         case KC_ESC:
             input_mode = NONE;
 
-            clear_user_input();
+            clear_input_buffer();
             editor_menu_needs_redraw();
 
             return false;
@@ -97,7 +93,7 @@ bool path_handler(uint16_t keycode, keyrecord_t *record) {
             input_mode = EDIT;
 
             editor_open(user_input);
-            clear_user_input();
+            clear_input_buffer();
 
             return false;
 
@@ -122,14 +118,14 @@ bool menu_handler(uint16_t keycode, keyrecord_t *record) {
     switch (keycode) {
         case KC_ESC:
             input_mode = EDIT;
-            clear_user_input();
+            clear_input_buffer();
             editor_menu_needs_redraw();
             return false;
 
         case KC_ENT:
             input_mode = NONE;
             editor_menu_selection();
-            clear_user_input();
+            clear_input_buffer();
             return false;
 
         default:
@@ -165,6 +161,11 @@ bool process_input_mode(uint16_t keycode, keyrecord_t *record) {
 
 char *get_input_buffer(void) {
     return user_input;
+}
+
+void clear_input_buffer(void) {
+    user_input_index = 0;
+    memset(user_input, 0, ARRAY_SIZE(user_input));
 }
 
 input_mode_t get_input_mode(void) {

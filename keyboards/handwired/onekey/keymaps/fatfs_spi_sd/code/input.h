@@ -22,5 +22,7 @@ char keycode_to_char(uint16_t keycode);
 
 bool process_input_mode(uint16_t k, keyrecord_t *kr);
 
+void clear_input_buffer(void);
 char *get_input_buffer(void);
+
 input_mode_t get_input_mode(void);

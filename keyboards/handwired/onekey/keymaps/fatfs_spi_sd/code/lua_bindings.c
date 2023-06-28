@@ -8,6 +8,8 @@
 #include <lualib.h>
 #include <lauxlib.h>
 
+#include "code/input.h"
+#include "code/lua_bindings.h"
 #include "code/fatfs_helpers.h"
 
 static lua_State *L;
@@ -119,6 +121,9 @@ static void create_files(void) {
     );
 }
 
+
+// ==================================================================
+// Misc funcs
 static int exec_impl(lua_State *L) {
     const char *filepath = luaL_checkstring(L, 1);
     if (filepath == NULL) {
@@ -174,6 +179,23 @@ static int lua_fatfs_read_file(lua_State *L) {
     lua_pushstring(L, content);
 
     return 1;
+}
+
+void lua_game_start(char *filepath) {
+    lua_pushstring(L, filepath);
+    lua_pushnil(L);
+    exec_impl(L);
+}
+
+void lua_game_tick(char *filepath, char *direction) {
+    lua_pushstring(L, filepath);
+
+    // args is on position -2 (now -3)
+    // args["direction"] = c
+    lua_pushstring(L, direction);
+    lua_setfield(L, -3, "direction");
+
+    exec_impl(L);
 }
 
 // ==================================================================
