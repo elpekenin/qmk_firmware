@@ -11,9 +11,6 @@ SNAKE_TAIL = 3
 FOOD       = 4
 WALL       = 5
 
--- MODE
-FW = false
-
 -------
 -- Food
 local function random_food_pos()
@@ -195,41 +192,29 @@ local function render_tile(args, row, col)
     local tile     = args["game"][row][col]
     local old_tile = args["old_game"][row][col]
 
-    if FW then
-        if tile == old_tile then
-            return
-        end
-        local map = {
-            [AIR]        = HSV_BLACK,
-            [FOOD]       = HSV_RED,
-            [SNAKE_HEAD] = HSV_YELLOW,
-            [SNAKE_BODY] = HSV_GREEN,
-            [SNAKE_TAIL] = HSV_BLUE,
-            [WALL]       = HSV_WHITE,
-        }
-        local color = map[tile]
-
-        qp_rect(
-            device_id,
-            row * 15,
-            col * 15,
-            (row + 1) * 15,
-            (col + 1) * 15,
-            color,
-            true
-        )
-    else
-        local map = {
-            [AIR]        = " ",
-            [FOOD]       = "X",
-            [SNAKE_HEAD] = "*",
-            [SNAKE_BODY] = "O",
-            [SNAKE_TAIL] = "·",
-            [WALL]       = "@",
-        }
-        local symbol = map[tile]
-        io.write(symbol .. ' ')
+    if tile == old_tile then
+        return
     end
+
+    local map = {
+        [AIR]        = HSV_BLACK,
+        [FOOD]       = HSV_RED,
+        [SNAKE_HEAD] = HSV_YELLOW,
+        [SNAKE_BODY] = HSV_GREEN,
+        [SNAKE_TAIL] = HSV_BLUE,
+        [WALL]       = HSV_WHITE,
+    }
+    local color = map[tile]
+
+    qp_rect(
+        device_id,
+        row * 15,
+        col * 15,
+        (row + 1) * 15,
+        (col + 1) * 15,
+        color,
+        true
+    )
 end
 
 local function render_game(args)
@@ -250,7 +235,6 @@ local function mainloop(args)
     end
 
     local snake         = args["snake"]
-    local old_direction = args["old_direction"]
     local direction     = args["direction"]
 
     -- user input
@@ -282,18 +266,4 @@ local function mainloop(args)
     return args
 end
 
-if FW then
-    return mainloop
-else
-    local args = nil
-    while true do
-        args = mainloop(args)
-        if not args["alive"] then
-            break
-        end
-
-        args["direction"] = io.read()
-    end
-
-    print("DIED :(")
-end
+return mainloop

@@ -181,12 +181,6 @@ static int lua_fatfs_read_file(lua_State *L) {
     return 1;
 }
 
-void lua_game_start(char *filepath) {
-    lua_pushstring(L, filepath);
-    lua_pushnil(L);
-    exec_impl(L);
-}
-
 void lua_game_tick(char *filepath, char *direction) {
     lua_pushstring(L, filepath);
 

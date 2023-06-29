@@ -68,13 +68,13 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     return false;
 }
 
-uint32_t deferred_init(uint32_t t, void* cb_arg) {
+uint32_t deferred_init(uint32_t t, void *cb_arg) {
     // FatFS
     mount();
 
     // Lua
     lua_setup();
-    lua_game_start("snake.lua");
+    lua_exec("snake.lua"); // start game
 
     // Quantum Painter
     device = qp_ili9486_make_spi_waveshare_device(320, 480, ILI9486_CS_PIN, DC_PIN, RST_PIN, SPI_DIV, SPI_MODE);
@@ -107,6 +107,7 @@ void housekeeping_task_user(void) {
     timer = timer_read();
 
     lua_game_tick("snake.lua", "d");
+    printf("House\n");
 
     // lua_exec("house.lua");
 }
