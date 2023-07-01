@@ -21,6 +21,7 @@
 #include "wait.h"
 #include "spi_master.h"
 #define __SPI_START() spi_start(SD_CS_PIN, false, SPI_MODE, SPI_DIV)
+#define __SPI_STOP() deselect(); spi_stop()
 
 /*--------------------------------------------------------------------------
 
@@ -286,8 +287,7 @@ DSTATUS disk_initialize (
     Stat = s;
 
     // Stop SPI
-    deselect();
-    spi_stop();
+    __SPI_STOP();
 
     return s;
 }
@@ -323,8 +323,7 @@ DRESULT disk_read (
         if (cmd == CMD18) send_cmd(CMD12, 0);  /* STOP_TRANSMISSION */
     }
 
-    deselect();
-    spi_stop();
+    __SPI_STOP();
 
     return count ? RES_ERROR : RES_OK;
 }
@@ -365,8 +364,7 @@ DRESULT disk_write (
         }
     }
 
-    deselect();
-    spi_stop();
+    __SPI_STOP();
 
     return count ? RES_ERROR : RES_OK;
 }
@@ -421,8 +419,7 @@ DRESULT disk_ioctl (
             res = RES_PARERR;
     }
 
-    deselect();
-    spi_stop();
+    __SPI_STOP();
 
     return res;
 }
