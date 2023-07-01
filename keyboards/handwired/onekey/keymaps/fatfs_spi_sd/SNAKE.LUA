@@ -1,7 +1,7 @@
 -------------
 -- Game state
-MAX_X    = 16
-MAX_Y    = 16
+MAX_X = 16
+MAX_Y = 16
 
 -- TILES
 AIR        = 0
@@ -222,7 +222,6 @@ local function render_game(args)
         for col = 1, MAX_X do
             render_tile(args, row, col)
         end
-        io.write("\n")
     end
 end
 
@@ -234,8 +233,8 @@ local function mainloop(args)
         args = init_game()
     end
 
-    local snake         = args["snake"]
-    local direction     = args["direction"]
+    local snake     = args["snake"]
+    local direction = args["direction"]
 
     -- user input
     if

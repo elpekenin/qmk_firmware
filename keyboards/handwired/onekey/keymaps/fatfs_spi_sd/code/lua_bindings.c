@@ -38,37 +38,7 @@ static void _register_color(HSV color, char *name) {
 
 
 static void create_files(void) {
-    // example function to be `exec`
-    write(
-        "recurse.lua",
-
-        "function _f(args)\n"
-        "    -- 1st iteration, start value\n"
-        "    if args == nil then\n"
-        "        args = {}\n"
-        "        args[0] = 10\n"
-        "    end\n"
-        "\n"
-        "    n = args[0]\n"
-        "    dprint('Recursive with value: ' .. n)\n"
-        "\n"
-        "    -- base case, gotta end somewhere\n"
-        "    if n == 0 then\n"
-        "        return\n"
-        "    end\n"
-        "\n"
-        "    args[0] = n - 1\n"
-        "    -- calls itself again, with n-1 \n"
-        "    wait_us(50e3)\n"
-        "    _f(args)\n"
-        "end\n"
-        "\n"
-        "return _f",
-
-        0
-    );
-
-    write(
+    fatfs_write(
         "house.lua",
 
         "function _f(args)\n"
@@ -91,34 +61,6 @@ static void create_files(void) {
 
         0
     );
-
-    write(
-        "qp_test.lua",
-
-        "function _f(args)\n"
-        "    device_id = 0\n"
-        "    font_id   = 0\n"
-        "\n"
-        "    geometry = qp_get_geometry(device_id)\n"
-        "    width  = geometry['width']\n"
-        "    height = geometry['height']\n"
-        "\n"
-        "    qp_rect(device_id, 0, 0, width, height, HSV_RED, true)\n"
-        "    qp_setpixel(device_id, 15, 15, HSV_WHITE)\n"
-        "    qp_line(device_id, 20, 20, 50, 20, HSV_BLUE)\n"
-        "    qp_circle(device_id, 100, 100, 50, HSV_YELLOW, false)\n"
-        "    \n"
-        "    textwidth = qp_textwidth(font_id, 'Test')\n"
-        "    dprint('Texwidth: ' .. textwidth .. 'px')\n"
-        "\n"
-        "    qp_drawtext(device_id, 0, 200, font_id, 'Normal')\n"
-        "    qp_drawtext_recolor(device_id, 0, 250, font_id, 'Recolor', HSV_GREEN, HSV_MAGENTA)\n"
-        "end\n"
-        "\n"
-        "return _f\n",
-
-        0
-    );
 }
 
 
@@ -132,7 +74,7 @@ static int exec_impl(lua_State *L) {
     }
 
     // load the file
-    char *content = read((char *)filepath, 0);
+    char *content = fatfs_read((char *)filepath, 0);
     if (content == NULL) {
         printf("exec_impl: error (couldn't read %s)\n", filepath);
         return 0;
@@ -175,7 +117,7 @@ static int lua_fatfs_read_file(lua_State *L) {
         return 1;
     }
 
-    char *content = read((char *)filepath, 0);
+    char *content = fatfs_read((char *)filepath, 0);
     lua_pushstring(L, content);
 
     return 1;

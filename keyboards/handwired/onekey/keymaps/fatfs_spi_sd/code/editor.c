@@ -217,7 +217,7 @@ void editor_open(char *_filepath) {
     strcpy(filepath, _filepath);
 
     memset(text_buffer, 0, ARRAY_SIZE(text_buffer));
-    read_into(filepath, 0, text_buffer);
+    fatfs_read_into(filepath, 0, text_buffer);
 
     text_buffer_index = 0;
 
@@ -431,12 +431,12 @@ void editor_menu_selection(void) {
     }
 
     if (action_flags & FILE_WRITE) {
-        write(filepath, text_buffer, 0);
+        fatfs_write(filepath, text_buffer, 0);
     }
 
     if (action_flags & FILE_CLOSE) {
         memset(text_buffer, 0, ARRAY_SIZE(text_buffer));
-        close();
+        fatfs_close();
 
         redraw_text = true;
         editor_text_needs_redraw();

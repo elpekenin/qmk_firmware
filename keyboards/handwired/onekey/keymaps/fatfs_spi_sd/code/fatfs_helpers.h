@@ -6,11 +6,11 @@
 // FatFS
 #include "ff.h"
 
-void mount(void);
+void fatfs_mount(void);
 
-char *read(char *path, UINT btr);
-void read_into(char *path, UINT btr, char *buffer); // WARNING: buffer has to be big enough
+char *fatfs_read(char *path, UINT btr);
+void fatfs_read_into(char *path, UINT btr, char *buffer); // WARNING: buffer has to be big enough
 
-void write(char *path, char *buff, UINT btw);
+void fatfs_write(char *path, char *buff, UINT btw);
 
-void close(void);
+void fatfs_close(void);

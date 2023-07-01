@@ -13,14 +13,14 @@ static FIL* Fil = &_Fil;
 
 static char read_buff[READ_BUFFER_SIZE] = {0};
 
-void mount(void) {
-    FRESULT fr = f_mount(&FatFs, "", 0);
+void fatfs_mount(void) {
+    FRESULT fr = f_mount(&FatFs, "", 1);
     if (fr != FR_OK) {
         printf("ERROR: couldnt mount, fr=%d\n", fr);
     }
 }
 
-char *read(char *path, UINT btr) {
+char *fatfs_read(char *path, UINT btr) {
     FRESULT fr = f_open(Fil, path, FA_READ);
 
     if (fr != FR_OK) {
@@ -47,13 +47,13 @@ char *read(char *path, UINT btr) {
         printf("WARN: bytes read != bytes to read\n");
     }
 
-    close();
+    fatfs_close();
 
     return read_buff;
 }
 
-void read_into(char *path, UINT btr, char *buffer) {
-    char *_buffer = read(path, btr);
+void fatfs_read_into(char *path, UINT btr, char *buffer) {
+    char *_buffer = fatfs_read(path, btr);
 
     if (!_buffer) {
         return;
@@ -62,7 +62,7 @@ void read_into(char *path, UINT btr, char *buffer) {
     strcpy(buffer, _buffer);
 }
 
-void write(char *path, char *buff, UINT btw) {
+void fatfs_write(char *path, char *buff, UINT btw) {
     FRESULT fr = f_open(Fil, path, FA_WRITE | FA_CREATE_ALWAYS);
 
     if (fr != FR_OK) {
@@ -82,10 +82,10 @@ void write(char *path, char *buff, UINT btw) {
         printf("WARN: bytes written != bytes to write\n");
     }
 
-    close();
+    fatfs_close();
 }
 
-void close(void) {
+void fatfs_close(void) {
     FRESULT fr;
     fr = f_close(Fil);
     if (fr != FR_OK) {
