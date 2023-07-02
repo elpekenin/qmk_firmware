@@ -81,7 +81,7 @@ local function init_game()
     return args
 end
 
-local function snapshot(args)
+local function update_cache(args)
     for r, row in pairs(args["game"]) do
         args["old_game"][r] = {} -- empty table
         for c, col in pairs(row) do
@@ -251,14 +251,14 @@ local function mainloop(args)
         args["old_direction"] = direction
     end
 
-    -- snapshot current map, reduce redraws
-    snapshot(args)
-
     -- this updates game
     local alive = snake_move(args)
 
     -- draws by comparing game with old_game
     render_game(args)
+
+    -- map's cache that avoids redraws
+    update_cache(args)
 
     args["alive"] = alive
 

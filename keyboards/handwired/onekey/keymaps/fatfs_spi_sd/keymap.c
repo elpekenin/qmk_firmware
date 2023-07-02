@@ -77,7 +77,7 @@ uint32_t deferred_init(uint32_t t, void *cb_arg) {
     qp_rect(device, 0, 0, 320, 480, HSV_BLACK, true);
 
     lua_setup();
-    lua_exec("snake.lua");
+    lua_game_start("snake.lua");
 
     return 0;
 }
@@ -97,12 +97,14 @@ void housekeeping_task_user(void) {
 
     // editor_flush(device, font);
 
-    static uint16_t timer = 0;
-    if (timer_elapsed(timer) < 1000) {
+    static uint32_t timer = 0;
+    if (timer_elapsed32(timer) < 1000) {
         return;
     }
-    timer = timer_read();
+    timer = timer_read32();
 
-    printf("House\n");
-    lua_game_tick("snake.lua", "d");
+    static uint8_t counter = 0;
+    char * directions[] = {"w", "a", "s", "d"};
+    lua_game_tick("snake.lua", directions[counter]);
+    counter = (counter + 1) % 4;
 }

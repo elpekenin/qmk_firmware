@@ -63,14 +63,21 @@ static void create_files(void) {
     );
 }
 
-
 // ==================================================================
 // Misc funcs
+
+// exec(filepath, args, nresults)
+// the results are not accessible from Lua (yet?)
 static int exec_impl(lua_State *L) {
     const char *filepath = luaL_checkstring(L, 1);
     if (filepath == NULL) {
         printf("exec_impl: error (filepath arg was bad)\n");
         return 0;
+    }
+
+    int nresults = 0;
+    if (lua_isinteger(L, 3)) {
+        nresults = luaL_checkinteger(L, 3);
     }
 
     // load the file
@@ -99,7 +106,7 @@ static int exec_impl(lua_State *L) {
     // execute it
     // g(args)
     lua_pushvalue(L, 2);
-    ret = lua_pcall(L, 1, 0, 0);
+    ret = lua_pcall(L, 1, nresults, 0);
     if (ret != LUA_OK) {
         printf("exec_impl: error (running custom func: %d)\n", ret);
         return 0;
@@ -123,15 +130,72 @@ static int lua_fatfs_read_file(lua_State *L) {
     return 1;
 }
 
+__attribute__((unused)) static void dumpstack (lua_State *L) {
+    int top = lua_gettop(L);
+    for (int i = 1; i <= top; ++i) {
+        printf("%d\t%s\t", i, luaL_typename(L,i));
+
+        switch (lua_type(L, i)) {
+            case LUA_TNUMBER:
+                printf("%d\n", (int)lua_tonumber(L,i));
+                break;
+
+            case LUA_TSTRING:
+                printf("%s\n", lua_tostring(L,i));
+                break;
+
+            case LUA_TBOOLEAN:
+                printf("%s\n", (lua_toboolean(L, i) ? "true" : "false"));
+                break;
+
+            case LUA_TNIL:
+                printf("%s\n", "nil");
+                break;
+
+            default:
+                printf("%p\n", lua_topointer(L,i));
+                break;
+        }
+    }
+}
+
+void lua_game_start(char *filepath) {
+    lua_exec(filepath, 1);
+}
+
 void lua_game_tick(char *filepath, char *direction) {
+    // args is on position -1, it was the returned by init/previous tick
+    // becomes -3 after pushing filepath and direction
     lua_pushstring(L, filepath);
 
-    // args is on position -2 (now -3)
     // args["direction"] = c
     lua_pushstring(L, direction);
     lua_setfield(L, -3, "direction");
 
+    // push args to the 2nd arg place
+    // setfield consumes value from stack, args is now -2
+    lua_pushvalue(L, -2);
+
+    // remove old args table
+    lua_remove(L, -3);
+
+    int nresults = 1;
+    lua_pushinteger(L, nresults);
+
     exec_impl(L);
+
+    // remove everything but the new args from stack
+    while (lua_gettop(L) > 1) {
+        lua_remove(L, -2);
+    }
+
+    lua_gc(L, LUA_GCCOLLECT);
+}
+
+const char *lua_get_type_str(int idx) {
+    int type = lua_type(L, idx);
+    const char *t = lua_typename(L, type);
+    return t;
 }
 
 // ==================================================================
@@ -517,9 +581,10 @@ void lua_setup(void) {
     LUA_REGISTER(qp_drawtext_recolor);
 }
 
-void lua_exec(char *filepath) {
+void lua_exec(char *filepath, int nresults) {
     lua_pushstring(L, filepath);
     lua_pushnil(L); // args parameter
+    lua_pushinteger(L, nresults);
     exec_impl(L);
 }
 

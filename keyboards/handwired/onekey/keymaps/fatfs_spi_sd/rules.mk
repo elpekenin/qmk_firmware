@@ -10,5 +10,8 @@ VPATH += $(KEYMAP_PATH)/code
 SRC += input.c \
        editor.c \
        lua_bindings.c \
-       fira_code.qff.c \
        fatfs_helpers.c \
+
+VPATH += $(KEYMAP_PATH)/assets
+SRC +=
+       fira_code.qff.c \

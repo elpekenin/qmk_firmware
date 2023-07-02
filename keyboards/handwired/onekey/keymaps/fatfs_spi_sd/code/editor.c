@@ -228,7 +228,7 @@ void editor_open(char *_filepath) {
 
 // ===== Deferred exec'ing the file allows to clear screen
 static uint32_t deferred_file_exec(uint32_t trigger_time, void *cb_arg) {
-    lua_exec(filepath);
+    lua_exec(filepath, 0);
     return 0;
 }
 

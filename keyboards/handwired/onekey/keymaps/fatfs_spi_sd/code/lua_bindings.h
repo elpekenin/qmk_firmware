@@ -7,7 +7,8 @@
 
 void lua_setup(void);
 
-void lua_exec(char *filepath);
+void lua_exec(char *filepath, int nresults);
+const char *lua_get_type_str(int idx);
 
 void lua_kill(void);
 
