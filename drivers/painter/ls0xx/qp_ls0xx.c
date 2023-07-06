@@ -54,7 +54,7 @@ mip_panel_painter_device_t ls0xx_drivers[LS0XX_NUM_DEVICES] = {0};
 // Quantum Painter API implementations
 
 __attribute__((weak)) bool qp_ls0xx_init(painter_device_t device, painter_rotation_t rotation) {
-    mip_panel_painter_device_t *mip_dev = (mip_panel_painter_device_t *)mip_dev;
+    mip_panel_painter_device_t *mip_dev = (mip_panel_painter_device_t *)device;
     painter_driver_t *          surface = (painter_driver_t *)mip_dev->framebuffer;
 
     const uint8_t ls0xx_init_sequence[] = { LS0XX_CLEAR, 0 };
