@@ -188,14 +188,13 @@ void lua_game_tick(char *filepath, char *direction) {
     while (lua_gettop(L) > 1) {
         lua_remove(L, -2);
     }
+    // lua_settop(L, -1); // why doesnt this work
 
     lua_gc(L, LUA_GCCOLLECT);
 }
 
 const char *lua_get_type_str(int idx) {
-    int type = lua_type(L, idx);
-    const char *t = lua_typename(L, type);
-    return t;
+    return luaL_typename(L, idx);
 }
 
 // ==================================================================

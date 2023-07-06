@@ -13,5 +13,4 @@ SRC += input.c \
        fatfs_helpers.c \
 
 VPATH += $(KEYMAP_PATH)/assets
-SRC +=
-       fira_code.qff.c \
+SRC += fira_code.qff.c
