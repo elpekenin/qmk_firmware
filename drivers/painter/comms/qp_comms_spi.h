@@ -1,6 +1,5 @@
 // Copyright 2021 Nick Brassel (@tzarc)
 // SPDX-License-Identifier: GPL-2.0-or-later
-
 #pragma once
 
 #ifdef QUANTUM_PAINTER_SPI_ENABLE
@@ -15,6 +14,7 @@
 
 typedef struct qp_comms_spi_config_t {
     pin_t    chip_select_pin;
+    bool     cs_active_high;
     uint16_t divisor;
     bool     lsb_first;
     int8_t   mode;
@@ -36,6 +36,7 @@ typedef struct qp_comms_spi_dc_reset_config_t {
     qp_comms_spi_config_t spi_config;
     pin_t                 dc_pin;
     pin_t                 reset_pin;
+    bool                  command_params_uses_command_pin; // keep D/C held low when sending command sequences for data bytes
 } qp_comms_spi_dc_reset_config_t;
 
 void     qp_comms_spi_dc_reset_send_command(painter_device_t device, uint8_t cmd);
