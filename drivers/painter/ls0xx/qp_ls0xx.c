@@ -77,8 +77,16 @@ bool qp_ls0xx_clear(painter_device_t device) {
     return qp_ls0xx_init(device, driver->rotation);
 }
 
+/* NOTE
+ * ----
+ * Display has to be written in full lines (width)
+ * Counting starts at 1, need to add to y
+ *
+ * TODO: Rotation support
+ * FIXME: This works up to y == 255
+ */
 bool qp_ls0xx_flush(painter_device_t device) {
-    mip_panel_painter_device_t *mip_dev = (mip_panel_painter_device_t *)mip_dev;
+    mip_panel_painter_device_t *mip_dev = (mip_panel_painter_device_t *)device;
     surface_painter_device_t *  surface = (surface_painter_device_t *)mip_dev->framebuffer;
     surface_dirty_data_t        dirty   = surface->dirty;
 
@@ -87,26 +95,17 @@ bool qp_ls0xx_flush(painter_device_t device) {
         return true;
     }
 
-    /* NOTE
-     * ----
-     * Display has to be written in full lines (width)
-     * Counting starts at 1, need to add to y
-     *
-     * TODO: Rotation support
-     * FIXME: This works up to y == 255
-     */
-    uint8_t top    = (uint8_t)surface->dirty.t + 1;
-    uint8_t bottom = (uint8_t)surface->dirty.b + 1;
-
-    uint8_t  bytes_per_line = (mip_dev->base.panel_width / 8) * mip_dev->base.native_bits_per_pixel;
-    uint16_t buffer_offset  = top * bytes_per_line;
+    const uint8_t top            = (uint8_t)surface->dirty.t + 1;
+    const uint8_t bottom         = (uint8_t)surface->dirty.b + 1;
+    const uint8_t bytes_per_line = (mip_dev->base.panel_width * mip_dev->base.native_bits_per_pixel) / 8;
+    uint16_t      buffer_offset  = (top - 1) * bytes_per_line;
 
     // start sending
     uint8_t cmd = LS0XX_WRITE;
     qp_comms_spi_send_data(device, &cmd, 1);
 
     // iterate over the lines
-    for (uint8_t i = 0; i < bottom - top; ++i) {
+    for (uint8_t i = 0; i < bottom + 1 - top ; ++i) {
         // set y-pos
         cmd = i + top;
         qp_comms_spi_send_data(device, &cmd, 1);
@@ -130,35 +129,35 @@ bool qp_ls0xx_flush(painter_device_t device) {
 }
 
 bool qp_ls0xx_viewport(painter_device_t device, uint16_t left, uint16_t top, uint16_t right, uint16_t bottom) {
-    mip_panel_painter_device_t *mip_dev = (mip_panel_painter_device_t *)mip_dev;
-    painter_driver_t *  surface = (painter_driver_t *)mip_dev->framebuffer;
+    mip_panel_painter_device_t *mip_dev = (mip_panel_painter_device_t *)device;
+    painter_driver_t *          surface = (painter_driver_t *)mip_dev->framebuffer;
 
     return surface->driver_vtable->viewport(surface, left, top, right, bottom);
 }
 
 bool qp_ls0xx_pixdata(painter_device_t device, const void *pixel_data, uint32_t native_pixel_count) {
-    mip_panel_painter_device_t *mip_dev = (mip_panel_painter_device_t *)mip_dev;
+    mip_panel_painter_device_t *mip_dev = (mip_panel_painter_device_t *)device;
     painter_driver_t *          surface = (painter_driver_t *)mip_dev->framebuffer;
 
     return surface->driver_vtable->pixdata(surface, pixel_data, native_pixel_count);
 }
 
 bool qp_ls0xx_palette_convert(painter_device_t device, int16_t palette_size, qp_pixel_t *palette) {
-    mip_panel_painter_device_t *mip_dev = (mip_panel_painter_device_t *)mip_dev;
+    mip_panel_painter_device_t *mip_dev = (mip_panel_painter_device_t *)device;
     painter_driver_t *          surface = (painter_driver_t *)mip_dev->framebuffer;
 
     return surface->driver_vtable->palette_convert(surface, palette_size, palette);
 }
 
 bool qp_ls0xx_append_pixels(painter_device_t device, uint8_t *target_buffer, qp_pixel_t *palette, uint32_t pixel_offset, uint32_t pixel_count, uint8_t *palette_indices) {
-    mip_panel_painter_device_t *mip_dev = (mip_panel_painter_device_t *)mip_dev;
+    mip_panel_painter_device_t *mip_dev = (mip_panel_painter_device_t *)device;
     painter_driver_t *          surface = (painter_driver_t *)mip_dev->framebuffer;
 
     return surface->driver_vtable->append_pixels(surface, target_buffer, palette, pixel_offset, pixel_count, palette_indices);
 }
 
 bool qp_ls0xx_append_pixdata(painter_device_t device, uint8_t *target_buffer, uint32_t pixdata_offset, uint8_t pixdata_byte) {
-    mip_panel_painter_device_t *mip_dev = (mip_panel_painter_device_t *)mip_dev;
+    mip_panel_painter_device_t *mip_dev = (mip_panel_painter_device_t *)device;
     painter_driver_t *          surface = (painter_driver_t *)mip_dev->framebuffer;
 
     return surface->driver_vtable->append_pixdata(surface, target_buffer, pixdata_offset, pixdata_byte);
