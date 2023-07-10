@@ -19,19 +19,19 @@ The QMK CLI can be used to convert from normal images such as PNG files or anima
 
 Supported devices:
 
-| Display Panel | Panel Type         | Size             | Comms Transport | Driver                                   |
-|---------------|--------------------|------------------|-----------------|------------------------------------------|
-| GC9A01        | RGB LCD (circular) | 240x240          | SPI + D/C + RST | `QUANTUM_PAINTER_DRIVERS += gc9a01_spi`  |
-| ILI9163       | RGB LCD            | 128x128          | SPI + D/C + RST | `QUANTUM_PAINTER_DRIVERS += ili9163_spi` |
-| ILI9341       | RGB LCD            | 240x320          | SPI + D/C + RST | `QUANTUM_PAINTER_DRIVERS += ili9341_spi` |
-| ILI9488       | RGB LCD            | 320x480          | SPI + D/C + RST | `QUANTUM_PAINTER_DRIVERS += ili9488_spi` |
-| SSD1351       | RGB OLED           | 128x128          | SPI + D/C + RST | `QUANTUM_PAINTER_DRIVERS += ssd1351_spi` |
-| ST7735        | RGB LCD            | 132x162, 80x160  | SPI + D/C + RST | `QUANTUM_PAINTER_DRIVERS += st7735_spi`  |
-| ST7789        | RGB LCD            | 240x320, 240x240 | SPI + D/C + RST | `QUANTUM_PAINTER_DRIVERS += st7789_spi`  |
-| SH1106 (SPI)  | Monochrome OLED    | 128x64           | SPI + D/C + RST | `QUANTUM_PAINTER_DRIVERS += sh1106_spi`  |
-| SH1106 (I2C)  | Monochrome OLED    | 128x64           | I2C             | `QUANTUM_PAINTER_DRIVERS += sh1106_i2c`  |
-| LS0XX         | MIP LCD            | User-defined     | SPI             | `QUANTUM_PAINTER_DRIVERS += ls0xx_spi`   |
-| Surface       | Virtual            | User-defined     | None            | `QUANTUM_PAINTER_DRIVERS += surface`     |
+| Display Panel | Panel Type         | Size             | Comms Transport | Driver                                       |
+|---------------|--------------------|------------------|-----------------|----------------------------------------------|
+| GC9A01        | RGB LCD (circular) | 240x240          | SPI + D/C + RST | `QUANTUM_PAINTER_DRIVERS += gc9a01_spi`      |
+| ILI9163       | RGB LCD            | 128x128          | SPI + D/C + RST | `QUANTUM_PAINTER_DRIVERS += ili9163_spi`     |
+| ILI9341       | RGB LCD            | 240x320          | SPI + D/C + RST | `QUANTUM_PAINTER_DRIVERS += ili9341_spi`     |
+| ILI9488       | RGB LCD            | 320x480          | SPI + D/C + RST | `QUANTUM_PAINTER_DRIVERS += ili9488_spi`     |
+| SSD1351       | RGB OLED           | 128x128          | SPI + D/C + RST | `QUANTUM_PAINTER_DRIVERS += ssd1351_spi`     |
+| ST7735        | RGB LCD            | 132x162, 80x160  | SPI + D/C + RST | `QUANTUM_PAINTER_DRIVERS += st7735_spi`      |
+| ST7789        | RGB LCD            | 240x320, 240x240 | SPI + D/C + RST | `QUANTUM_PAINTER_DRIVERS += st7789_spi`      |
+| SH1106 (SPI)  | Monochrome OLED    | 128x64           | SPI + D/C + RST | `QUANTUM_PAINTER_DRIVERS += sh1106_spi`      |
+| SH1106 (I2C)  | Monochrome OLED    | 128x64           | I2C             | `QUANTUM_PAINTER_DRIVERS += sh1106_i2c`      |
+| LS013B7DH03   | MIP LCD            | 128x128          | SPI             | `QUANTUM_PAINTER_DRIVERS += ls013b7dh03_spi` |
+| Surface       | Virtual            | User-defined     | None            | `QUANTUM_PAINTER_DRIVERS += surface`         |
 
 ## Quantum Painter Configuration :id=quantum-painter-config
 
@@ -444,44 +444,33 @@ For these displays, QMK's `spi_master` must already be correctly configured for 
 
 The pin assignment for SPI CS is specified during device construction.
 
-#### ** LS0XX **
+#### ** LS013B7DH03 **
 
-Enabling support for the LS0XX series of displays in Quantum Painter is done by adding the following to `rules.mk`:
+<!-- tabs:start -->
+
+Enabling support for the LS013B7DH03 in Quantum Painter is done by adding the following to `rules.mk`:
 
 ```make
 QUANTUM_PAINTER_ENABLE = yes
-QUANTUM_PAINTER_DRIVERS += ls0xx_spi
+QUANTUM_PAINTER_DRIVERS += ls013b7dh03_spi
 ```
 
-Creating a LS0XX device in firmware can then be done with the following API:
+Creating a LS013B7DH03 device in firmware can then be done with the following API:
 
 ```c
-painter_device_t qp_ls0xx_make_spi_device(uint16_t panel_width, uint16_t panel_height, pin_t chip_select_pin, uint16_t spi_divisor, int spi_mode, void *buffer);
+painter_device_t qp_ls013b7dh03_make_spi_device(pin_t chip_select_pin, uint16_t spi_divisor, int spi_mode);
 ```
 
-The `buffer` is a user-supplied area of memory, which can be statically allocated using `SURFACE_REQUIRED_BUFFER_BYTE_SIZE`:
-
-```c
-// Buffer required for a 128x200 display:
-uint8_t framebuffer[SURFACE_REQUIRED_BUFFER_BYTE_SIZE(128, 200, 1)];
-```
-
-##### ** Since all the displays in the family are pretty much the same, you can use this generic function. However we also have aliases for the devices that have been confirmed working **
-
-```c
-painter_device_t qp_ls013b7dh03_make_spi_device(pin_t chip_select_pin, uint16_t spi_divisor, int spi_mode, void *buffer);
-```
-
-The device handle returned from the `qp_ls0???_make_spi_device` function can be used to perform all other drawing operations.
+The device handle returned from the `qp_ls013b7dh03_make_spi_device` function can be used to perform all other drawing operations.
 
 The maximum number of displays can be configured by changing the following in your `config.h` (default is 1):
 
 ```c
 // 3 displays:
-#define LS0XX_NUM_DEVICES 3
-
-// !! This driver uses a surface display, you also need to increase the maximum amount of those.
+#define LS013B7DH03_NUM_DEVICES 3
 ```
+
+<!-- tabs:end -->
 
 ### ** Surface **
 

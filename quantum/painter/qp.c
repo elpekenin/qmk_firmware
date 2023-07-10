@@ -65,7 +65,7 @@ bool qp_init(painter_device_t device, painter_rotation_t rotation) {
 bool qp_power(painter_device_t device, bool power_on) {
     qp_dprintf("qp_power: entry\n");
     painter_driver_t *driver = (painter_driver_t *)device;
-    if (!driver->validate_ok) {
+    if (!driver || !driver->validate_ok) {
         qp_dprintf("qp_power: fail (validation_ok == false)\n");
         return false;
     }
@@ -87,7 +87,7 @@ bool qp_power(painter_device_t device, bool power_on) {
 bool qp_clear(painter_device_t device) {
     qp_dprintf("qp_clear: entry\n");
     painter_driver_t *driver = (painter_driver_t *)device;
-    if (!driver->validate_ok) {
+    if (!driver || !driver->validate_ok) {
         qp_dprintf("qp_clear: fail (validation_ok == false)\n");
         return false;
     }
@@ -109,7 +109,7 @@ bool qp_clear(painter_device_t device) {
 bool qp_flush(painter_device_t device) {
     qp_dprintf("qp_flush: entry\n");
     painter_driver_t *driver = (painter_driver_t *)device;
-    if (!driver->validate_ok) {
+    if (!driver || !driver->validate_ok) {
         qp_dprintf("qp_flush: fail (validation_ok == false)\n");
         return false;
     }
@@ -188,7 +188,7 @@ void qp_set_viewport_offsets(painter_device_t device, uint16_t offset_x, uint16_
 bool qp_viewport(painter_device_t device, uint16_t left, uint16_t top, uint16_t right, uint16_t bottom) {
     qp_dprintf("qp_viewport: entry\n");
     painter_driver_t *driver = (painter_driver_t *)device;
-    if (!driver->validate_ok) {
+    if (!driver || !driver->validate_ok) {
         qp_dprintf("qp_viewport: fail (validation_ok == false)\n");
         return false;
     }
@@ -211,7 +211,7 @@ bool qp_viewport(painter_device_t device, uint16_t left, uint16_t top, uint16_t 
 bool qp_pixdata(painter_device_t device, const void *pixel_data, uint32_t native_pixel_count) {
     qp_dprintf("qp_pixdata: entry\n");
     painter_driver_t *driver = (painter_driver_t *)device;
-    if (!driver->validate_ok) {
+    if (!driver || !driver->validate_ok) {
         qp_dprintf("qp_pixdata: fail (validation_ok == false)\n");
         return false;
     }

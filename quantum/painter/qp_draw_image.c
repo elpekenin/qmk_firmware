@@ -210,7 +210,7 @@ static bool qp_drawimage_prepare_frame_for_stream_read(painter_device_t device, 
 static bool qp_drawimage_recolor_impl(painter_device_t device, uint16_t x, uint16_t y, painter_image_handle_t image, int frame_number, qgf_frame_info_t *frame_info, qp_pixel_t fg_hsv888, qp_pixel_t bg_hsv888) {
     qp_dprintf("qp_drawimage_recolor: entry\n");
     painter_driver_t *driver = (painter_driver_t *)device;
-    if (!driver->validate_ok) {
+    if (!driver || !driver->validate_ok) {
         qp_dprintf("qp_drawimage_recolor: fail (validation_ok == false)\n");
         return false;
     }

@@ -3,8 +3,8 @@
     "processor": "RP2040",
     "bootloader": "rp2040",
     "matrix_pins": {
-        "cols": ["GP4"],
-        "rows": ["GP5"]
+        "cols": ["GP14"],
+        "rows": ["GP15"]
     },
     "backlight": {
         "pin": "GP25"

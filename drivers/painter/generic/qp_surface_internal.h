@@ -52,6 +52,10 @@ typedef struct surface_painter_device_t {
 
     // Maintain a dirty region so we can stream only what we need
     surface_dirty_data_t dirty;
+
+    // Order in which pixels are appended to the buffer
+    // ie: starting from least- or most- significant bits
+    bool invert_order;
 } surface_painter_device_t;
 
 /**
@@ -89,6 +93,7 @@ bool qp_surface_flush(painter_device_t device);
 bool qp_surface_viewport(painter_device_t device, uint16_t left, uint16_t top, uint16_t right, uint16_t bottom);
 void qp_surface_increment_pixdata_location(surface_viewport_data_t *viewport);
 void qp_surface_update_dirty(surface_dirty_data_t *dirty, uint16_t x, uint16_t y);
+void qp_surface_apply_rotation(surface_painter_device_t *surface, uint16_t *x, uint16_t *y, uint16_t *w, uint16_t *h);
 
 #endif // QUANTUM_PAINTER_SURFACE_ENABLE
 

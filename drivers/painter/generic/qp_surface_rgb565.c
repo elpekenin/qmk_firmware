@@ -15,9 +15,16 @@ static inline void setpixel_rgb565(surface_painter_device_t *surface, uint16_t x
     uint16_t w = surface->base.panel_width;
     uint16_t h = surface->base.panel_height;
 
+    qp_surface_apply_rotation(surface, &x, &y, &w, &h);
+
     // Drop out if it's off-screen
     if (x >= w || y >= h) {
         return;
+    }
+
+    // note we dont use bitrev16, because we want to flip each byte
+    if (surface->invert_order) {
+        rgb565 = (bitrev(rgb565 >> 8) << 8) | (bitrev(rgb565 & 0xFF));
     }
 
     // Skip messing with the dirty info if the original value already matches

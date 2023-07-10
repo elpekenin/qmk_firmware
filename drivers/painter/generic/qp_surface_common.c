@@ -49,6 +49,41 @@ void qp_surface_update_dirty(surface_dirty_data_t *dirty, uint16_t x, uint16_t y
     }
 }
 
+void qp_surface_apply_rotation(surface_painter_device_t *surface, uint16_t *x, uint16_t *y, uint16_t *w, uint16_t *h) {
+    uint16_t temp;
+
+    switch (surface->base.rotation) {
+        case QP_ROTATION_0:
+            break;
+
+        case QP_ROTATION_90:
+            temp = *y;
+            *y = *x;
+            *x = *w - temp - 1;
+
+            temp = *w;
+            *w = *h;
+            *h = temp;
+
+            break;
+
+        case QP_ROTATION_180:
+            *x = *w - *x - 1;
+            *y = *h - *y - 1;
+            break;
+
+        case QP_ROTATION_270:
+            temp = *x;
+            *x = *y;
+            *y = *h - temp - 1;
+
+            temp = *w;
+            *w = *h;
+            *h = temp;
+
+            break;
+    }
+}
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Driver vtable
 

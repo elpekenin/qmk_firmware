@@ -9,4 +9,8 @@
 #define SPI_MISO_PIN NO_PIN
 #define CS_PIN       GP4
 
-#define QUANTUM_PAINTER_DEBUG
+#define SPI_DIV 16
+
+// #define QUANTUM_PAINTER_DEBUG
+/* just enough for the whole display */
+#define QUANTUM_PAINTER_PIXDATA_BUFFER_SIZE 2048
