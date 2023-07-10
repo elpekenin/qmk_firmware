@@ -49,7 +49,7 @@ void qp_surface_update_dirty(surface_dirty_data_t *dirty, uint16_t x, uint16_t y
     }
 }
 
-void qp_surface_apply_rotation(surface_painter_device_t *surface, uint16_t *x, uint16_t *y, uint16_t *w, uint16_t *h) {
+void qp_surface_apply_rotation(surface_painter_device_t *surface, uint16_t *x, uint16_t *y, uint16_t w, uint16_t h) {
     uint16_t temp;
 
     switch (surface->base.rotation) {
@@ -59,28 +59,18 @@ void qp_surface_apply_rotation(surface_painter_device_t *surface, uint16_t *x, u
         case QP_ROTATION_90:
             temp = *y;
             *y = *x;
-            *x = *w - temp - 1;
-
-            temp = *w;
-            *w = *h;
-            *h = temp;
-
+            *x = w - temp - 1;
             break;
 
         case QP_ROTATION_180:
-            *x = *w - *x - 1;
-            *y = *h - *y - 1;
+            *x = w - *x - 1;
+            *y = h - *y - 1;
             break;
 
         case QP_ROTATION_270:
             temp = *x;
             *x = *y;
-            *y = *h - temp - 1;
-
-            temp = *w;
-            *w = *h;
-            *h = temp;
-
+            *y = h - temp - 1;
             break;
     }
 }
@@ -91,6 +81,12 @@ bool qp_surface_init(painter_device_t device, painter_rotation_t rotation) {
     painter_driver_t *        driver  = (painter_driver_t *)device;
     surface_painter_device_t *surface = (surface_painter_device_t *)driver;
     memset(surface->buffer, 0, SURFACE_REQUIRED_BUFFER_BYTE_SIZE(driver->panel_width, driver->panel_height, driver->native_bits_per_pixel));
+
+    if (rotation == QP_ROTATION_90 || rotation == QP_ROTATION_270) {
+        uint16_t temp = surface->base.panel_width;
+        surface->base.panel_width = surface->base.panel_height;
+        surface->base.panel_height = temp;
+    }
 
     surface->dirty.l        = 0;
     surface->dirty.t        = 0;

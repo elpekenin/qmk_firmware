@@ -24,7 +24,7 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Quantum Painter API implementations
 
-__attribute__((weak)) bool qp_sharp_panel_passthru_init(painter_device_t device, painter_rotation_t rotation) {
+__attribute__((weak)) bool qp_sharp_panel_init(painter_device_t device, painter_rotation_t rotation) {
     mip_panel_painter_device_t *mip_dev = (mip_panel_painter_device_t *)device;
     painter_driver_t *          surface = (painter_driver_t *)&mip_dev->surface;
 
@@ -35,7 +35,11 @@ __attribute__((weak)) bool qp_sharp_panel_passthru_init(painter_device_t device,
 
     mip_dev->base.rotation = rotation;
 
-    surface->driver_vtable->init(surface, rotation);
+    // Init the internal surface
+    if (!surface->driver_vtable->init(surface, rotation)) {
+        qp_dprintf("Failed to init internal surface in qp_sharp_panel_init\n");
+        return false;
+    }
 
     return true;
 }
@@ -48,7 +52,7 @@ bool qp_sharp_panel_passthru_power(painter_device_t device, bool power_on) {
 bool qp_sharp_panel_passthru_clear(painter_device_t device) {
     // Just re-init the display
     painter_driver_t *driver = (painter_driver_t *)device;
-    return qp_sharp_panel_passthru_init(device, driver->rotation);
+    return qp_sharp_panel_init(device, driver->rotation);
 }
 
 /* NOTE
@@ -59,7 +63,7 @@ bool qp_sharp_panel_passthru_clear(painter_device_t device) {
  * TODO: Rotation support
  * FIXME: This works up to y == 255
  */
-bool qp_sharp_panel_passthru_flush(painter_device_t device) {
+bool qp_sharp_panel_flush(painter_device_t device) {
     mip_panel_painter_device_t *mip_dev = (mip_panel_painter_device_t *)device;
     surface_painter_device_t   *surface = &mip_dev->surface;
     surface_dirty_data_t       dirty    = surface->dirty;
@@ -145,10 +149,10 @@ bool qp_sharp_panel_passthru_append_pixdata(painter_device_t device, uint8_t *ta
 // Driver vtable
 
 const painter_driver_vtable_t ls0xx_driver_vtable = {
-    .init            = qp_sharp_panel_passthru_init,
+    .init            = qp_sharp_panel_init,
     .power           = qp_sharp_panel_passthru_power,
     .clear           = qp_sharp_panel_passthru_clear,
-    .flush           = qp_sharp_panel_passthru_flush,
+    .flush           = qp_sharp_panel_flush,
     .pixdata         = qp_sharp_panel_passthru_pixdata,
     .viewport        = qp_sharp_panel_passthru_viewport,
     .palette_convert = qp_sharp_panel_passthru_palette_convert,
