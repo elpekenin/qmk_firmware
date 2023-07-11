@@ -28,18 +28,19 @@ __attribute__((weak)) bool qp_sharp_panel_init(painter_device_t device, painter_
     mip_panel_painter_device_t *mip_dev = (mip_panel_painter_device_t *)device;
     painter_driver_t *          surface = (painter_driver_t *)&mip_dev->surface;
 
-    writePinHigh(mip_dev->spi_config.chip_select_pin);
-    const uint8_t ls0xx_init_sequence[] = { LS0XX_CLEAR, 0 };
-    spi_transmit(ls0xx_init_sequence, ARRAY_SIZE(ls0xx_init_sequence));
-    writePinLow(mip_dev->spi_config.chip_select_pin);
-
-    mip_dev->base.rotation = rotation;
-
     // Init the internal surface
     if (!surface->driver_vtable->init(surface, rotation)) {
         qp_dprintf("Failed to init internal surface in qp_sharp_panel_init\n");
         return false;
     }
+
+    mip_dev->base.rotation = rotation;
+    surface->rotation      = rotation;
+
+    writePinHigh(mip_dev->spi_config.chip_select_pin);
+    const uint8_t ls0xx_init_sequence[] = { LS0XX_CLEAR, 0 };
+    spi_transmit(ls0xx_init_sequence, ARRAY_SIZE(ls0xx_init_sequence));
+    writePinLow(mip_dev->spi_config.chip_select_pin);
 
     return true;
 }
@@ -73,19 +74,29 @@ bool qp_sharp_panel_flush(painter_device_t device) {
         return true;
     }
 
-    const uint8_t top            = (uint8_t)dirty.t;
-    const uint8_t bottom         = (uint8_t)dirty.b;
-    const uint8_t bytes_per_line = (mip_dev->base.panel_width + 7) / 8 * mip_dev->base.native_bits_per_pixel;
-    uint16_t      buffer_offset  = top * bytes_per_line;
+    // find out dirty area
+    uint8_t top;
+    uint8_t bottom;
+    if (mip_dev->base.rotation == QP_ROTATION_0 || mip_dev->base.rotation == QP_ROTATION_180) {
+        top    = (uint8_t)dirty.t;
+        bottom = (uint8_t)dirty.b;
+    } else {
+        top    = (uint8_t)dirty.l;
+        bottom = (uint8_t)dirty.r;
+    }
 
-    writePinHigh(mip_dev->spi_config.chip_select_pin);
+    // bytes sent for each row's data
+    uint8_t bytes_per_line = (mip_dev->base.panel_width + 7) / 8 * mip_dev->base.native_bits_per_pixel;
+    // offset used to access such data
+    uint16_t buffer_offset = top * bytes_per_line;
 
     // start sending
+    writePinHigh(mip_dev->spi_config.chip_select_pin);
     uint8_t cmd = LS0XX_WRITE | LS0XX_VCOM;
     spi_transmit(&cmd, 1);
 
     // dummy data for alignment, value doesnt matter
-    static const uint8_t dummy = 0;
+    uint8_t dummy = 0;
 
     // iterate over the lines
     for (uint8_t i = 0; i < bottom + 1 - top ; ++i) {
@@ -101,7 +112,6 @@ bool qp_sharp_panel_flush(painter_device_t device) {
     }
 
     spi_transmit(&dummy, 1);
-
     writePinLow(mip_dev->spi_config.chip_select_pin);
 
     // clear surface's dirty area, no API to prevent extra prints

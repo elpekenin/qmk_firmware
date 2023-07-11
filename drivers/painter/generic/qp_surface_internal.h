@@ -93,7 +93,7 @@ bool qp_surface_flush(painter_device_t device);
 bool qp_surface_viewport(painter_device_t device, uint16_t left, uint16_t top, uint16_t right, uint16_t bottom);
 void qp_surface_increment_pixdata_location(surface_viewport_data_t *viewport);
 void qp_surface_update_dirty(surface_dirty_data_t *dirty, uint16_t x, uint16_t y);
-void qp_surface_apply_rotation(surface_painter_device_t *surface, uint16_t *x, uint16_t *y, uint16_t w, uint16_t h);
+void qp_surface_apply_rotation(surface_painter_device_t *surface, uint16_t *x, uint16_t *y);
 
 #endif // QUANTUM_PAINTER_SURFACE_ENABLE
 

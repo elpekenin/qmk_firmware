@@ -15,7 +15,7 @@ static inline void setpixel_mono1bpp(surface_painter_device_t *surface, uint16_t
     uint16_t w = surface->base.panel_width;
     uint16_t h = surface->base.panel_height;
 
-    qp_surface_apply_rotation(surface, &x, &y, w, h);
+    qp_surface_apply_rotation(surface, &x, &y);
 
     // Drop out if it's off-screen
     if (x >= w || y >= h) {
