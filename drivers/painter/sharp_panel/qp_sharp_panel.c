@@ -61,7 +61,6 @@ bool qp_sharp_panel_passthru_clear(painter_device_t device) {
  * Display has to be written in full lines (width)
  * Counting starts at 1, need to add to y
  *
- * TODO: Rotation support
  * FIXME: This works up to y == 255
  */
 bool qp_sharp_panel_flush(painter_device_t device) {

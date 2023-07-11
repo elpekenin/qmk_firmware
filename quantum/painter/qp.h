@@ -510,6 +510,12 @@ int16_t qp_drawtext_recolor(painter_device_t device, uint16_t x, uint16_t y, pai
 #    define LS013B7DH03_NUM_DEVICES 0
 #endif // QUANTUM_PAINTER_LS013B7DH03_ENABLE
 
+#ifdef QUANTUM_PAINTER_LS011B7DH03_ENABLE
+#    include "qp_ls011b7dh03.h"
+#else // QUANTUM_PAINTER_LS011B7DH03_ENABLE
+#    define LS011B7DH03_NUM_DEVICES 0
+#endif // QUANTUM_PAINTER_LS011B7DH03_ENABLE
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Quantum Painter Extras
 

@@ -24,7 +24,7 @@
     __TYPE_NAME(name) __STORAGE_NAME(name)[__NUM_DEVICES(name)] = {0};
 
 
-#define _SHARP_CONSTRUCTOR(name, width, height)                                                                                        \
+#define _SHARP_SPI_CONSTRUCTOR(name, width, height)                                                                                    \
     painter_device_t __FUNC_NAME(name) (pin_t chip_select_pin, uint16_t spi_divisor, int spi_mode) {                                   \
     for (uint32_t i = 0; i < __NUM_DEVICES(name); ++i) {                                                                               \
         __TYPE_NAME(name) *driver = &__STORAGE_NAME(name)[i];                                                                          \
@@ -58,10 +58,10 @@
 }
 
 
-#define SHARP_IMPL(name, width, height) \
-    _SHARP_TYPE(name, width, height)    \
-    _SHARP_STORAGE(name)                \
-    _SHARP_CONSTRUCTOR(name, width, height)
+#define SHARP_SPI_IMPL(name, width, height) \
+    _SHARP_TYPE(name, width, height)        \
+    _SHARP_STORAGE(name)                    \
+    _SHARP_SPI_CONSTRUCTOR(name, width, height)
 
 #define SHARP_PROTOTYPE(name, width, height) \
     painter_device_t __FUNC_NAME(name) (pin_t chip_select_pin, uint16_t spi_divisor, int spi_mode);

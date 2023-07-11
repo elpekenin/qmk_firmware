@@ -17,6 +17,7 @@ VALID_QUANTUM_PAINTER_DRIVERS := \
     sh1106_i2c \
     sh1106_spi \
     ls013b7dh03_spi \
+    ls011b7dh03_spi \
 
 #-------------------------------------------------------------------------------
 
@@ -168,6 +169,16 @@ define handle_quantum_painter_driver
         SRC += \
             $(DRIVER_PATH)/painter/sharp_panel/qp_sharp_panel.c \
             $(DRIVER_PATH)/painter/sharp_panel/qp_ls013b7dh03.c
+
+	else ifeq ($$(strip $$(CURRENT_PAINTER_DRIVER)),ls011b7dh03_spi)
+        QUANTUM_PAINTER_NEEDS_SURFACE := yes
+        QUANTUM_PAINTER_NEEDS_COMMS_SPI := yes
+        OPT_DEFS += -DQUANTUM_PAINTER_LS011B7DH03_ENABLE -DQUANTUM_PAINTER_LS011B7DH03_SPI_ENABLE
+        COMMON_VPATH += \
+            $(DRIVER_PATH)/painter/sharp_panel
+        SRC += \
+            $(DRIVER_PATH)/painter/sharp_panel/qp_sharp_panel.c \
+            $(DRIVER_PATH)/painter/sharp_panel/qp_ls011b7dh03.c
 
     endif
 endef

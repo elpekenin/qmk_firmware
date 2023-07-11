@@ -444,11 +444,11 @@ For these displays, QMK's `spi_master` must already be correctly configured for 
 
 The pin assignment for SPI CS is specified during device construction.
 
-#### ** LS013B7DH03 **
-
 <!-- tabs:start -->
 
-Enabling support for the LS013B7DH03 in Quantum Painter is done by adding the following to `rules.mk`:
+#### ** LS013B7DH03 **
+
+Enabling support for the LS013B7DH03 (128x128px) in Quantum Painter is done by adding the following to `rules.mk`:
 
 ```make
 QUANTUM_PAINTER_ENABLE = yes
@@ -468,6 +468,30 @@ The maximum number of displays can be configured by changing the following in yo
 ```c
 // 3 displays:
 #define LS013B7DH03_NUM_DEVICES 3
+```
+
+#### ** LS011B7DH03 (nice!view) **
+
+Enabling support for the LS011B7DH03 (160x68px, used on `nice!view`) in Quantum Painter is done by adding the following to `rules.mk`:
+
+```make
+QUANTUM_PAINTER_ENABLE = yes
+QUANTUM_PAINTER_DRIVERS += ls011b7dh03_spi
+```
+
+Creating a LS011B7DH03 device in firmware can then be done with the following API:
+
+```c
+painter_device_t qp_ls011b7dh03_make_spi_device(pin_t chip_select_pin, uint16_t spi_divisor, int spi_mode);
+```
+
+The device handle returned from the `qp_ls011b7dh03_make_spi_device` function can be used to perform all other drawing operations.
+
+The maximum number of displays can be configured by changing the following in your `config.h` (default is 1):
+
+```c
+// 3 displays:
+#define LS011B7DH03_NUM_DEVICES 3
 ```
 
 <!-- tabs:end -->

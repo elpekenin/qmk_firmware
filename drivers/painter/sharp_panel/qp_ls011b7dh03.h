@@ -8,17 +8,17 @@
 #include "qp_sharp_helper.h"
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Quantum Painter LS013B7DH03 configurables (add to your keyboard's config.h)
+// Quantum Painter LS011B7DH03 configurables (add to your keyboard's config.h)
 
-#ifndef LS013B7DH03_NUM_DEVICES
-#    define LS013B7DH03_NUM_DEVICES 1
+#ifndef LS011B7DH03_NUM_DEVICES
+#    define LS011B7DH03_NUM_DEVICES 1
 #endif
 
 // "translation" for compatibility with string'ified name
-#define ls013b7dh03_NUM_DEVICES LS013B7DH03_NUM_DEVICES
+#define ls011b7dh03_NUM_DEVICES LS011B7DH03_NUM_DEVICES
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Quantum Painter LS013B7DH03 device factory
-#if defined(QUANTUM_PAINTER_LS013B7DH03_SPI_ENABLE)
-SHARP_PROTOTYPE(ls013b7dh03, 128, 128)
-#endif // defined(QUANTUM_PAINTER_LS013B7DH03_SPI_ENABLE)
+// Quantum Painter LS011B7DH03 device factory
+#if defined(QUANTUM_PAINTER_LS011B7DH03_SPI_ENABLE)
+SHARP_PROTOTYPE(ls011b7dh03, 128, 128)
+#endif // defined(QUANTUM_PAINTER_LS011B7DH03_SPI_ENABLE)
