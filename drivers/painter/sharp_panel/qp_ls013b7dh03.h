@@ -5,30 +5,18 @@
 
 #include "gpio.h"
 #include "qp_internal.h"
+#include "qp_sharp_helper.h"
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Quantum Painter LS013B7DH03 configurables (add to your keyboard's config.h)
 
 #ifndef LS013B7DH03_NUM_DEVICES
-/**
- * @def This controls the maximum number of LS013B7DH03 devices that Quantum Painter can communicate with at any one time.
- *      Increasing this number allows for multiple displays to be used.
- */
 #    define LS013B7DH03_NUM_DEVICES 1
+     // "translation" for compatibility with string'ified name
+#    define ls013b7dh03_NUM_DEVICES LS013B7DH03_NUM_DEVICES
 #endif
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Quantum Painter LS013B7DH03 device factories
-
-#ifdef QUANTUM_PAINTER_LS013B7DH03_SPI_ENABLE
-/**
- * Factory method for a generic LS013B7DH03(128x128) SPI MIP device.
- *
- * @param chip_select_pin[in] the GPIO pin used for SPI chip select
- * @param spi_divisor[in] the SPI divisor to use when communicating with the display
- * @param spi_mode[in] the SPI mode to use when communicating with the display
- * @return the device handle used with all drawing routines in Quantum Painter
- */
-painter_device_t qp_ls013b7dh03_make_spi_device(pin_t chip_select_pin, uint16_t spi_divisor, int spi_mode);
-#endif // QUANTUM_PAINTER_LS013B7DH03_SPI_ENABLE
+// Quantum Painter LS013B7DH03 device factory
+SHARP_PROTOTYPE(ls013b7dh03, 128, 128)
 

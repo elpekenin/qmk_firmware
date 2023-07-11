@@ -6,9 +6,7 @@
 #include "qp_internal.h"
 #include "qp_surface_internal.h"
 
-#ifdef QUANTUM_PAINTER_SPI_ENABLE
-#    include "qp_comms_spi.h"
-#endif // QUANTUM_PAINTER_SPI_ENABLE
+#include "qp_comms_spi.h"
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Common MIP panel implementation for Sharp displays, using 3-wire SPI.
