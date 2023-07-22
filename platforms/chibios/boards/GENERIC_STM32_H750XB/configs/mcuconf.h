@@ -18,7 +18,7 @@
  *
  * CHANGED:
  *    - STM32_USB_USE_OTG2 to TRUE
- *    -
+ *    - Timer config based on <https://github.com/ArduPilot/ardupilot/blob/master/libraries/AP_HAL_ChibiOS/hwdef/common/stm32h7_mcuconf.h>
  */
 
 #ifndef MCUCONF_H
