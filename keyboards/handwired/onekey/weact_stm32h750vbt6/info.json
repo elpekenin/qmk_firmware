@@ -1,9 +1,9 @@
 {
     "keyboard_name": "Onekey WeAct H750VBT6",
     "processor": "STM32H750",
-    "bootloader": "stm32-dfu",
+    "bootloader": "tinyuf2",
     "matrix_pins": {
-        "cols": ["A12"],
-        "rows": ["A15"]
+        "cols": ["B12"],
+        "rows": ["B13"]
     }
 }

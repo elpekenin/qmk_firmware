@@ -39,13 +39,6 @@
  */
 
 #define STM32H7xx_MCUCONF
-#define STM32H742_MCUCONF
-#define STM32H743_MCUCONF
-#define STM32H753_MCUCONF
-#define STM32H745_MCUCONF
-#define STM32H755_MCUCONF
-#define STM32H747_MCUCONF
-#define STM32H757_MCUCONF
 #define STM32H750_MCUCONF
 
 /*
@@ -495,8 +488,8 @@
 /*
  * USB driver system settings.
  */
-#define STM32_USB_USE_OTG1                  FALSE
-#define STM32_USB_USE_OTG2                  TRUE
+#define STM32_USB_USE_OTG1                  TRUE
+#define STM32_USB_USE_OTG2                  FALSE
 #define STM32_USB_OTG1_IRQ_PRIORITY         14
 #define STM32_USB_OTG2_IRQ_PRIORITY         14
 #define STM32_USB_OTG1_RX_FIFO_SIZE         512

@@ -1,0 +1,1 @@
+MCU_LDSCRIPT = STM32H750xB_qspi_tinyuf2

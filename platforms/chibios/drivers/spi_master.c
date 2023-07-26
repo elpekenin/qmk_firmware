@@ -20,11 +20,7 @@
 
 static pin_t currentSlavePin = NO_PIN;
 
-#if defined(K20x) || defined(KL2x) || defined(RP2040)
-static SPIConfig spiConfig = {NULL, 0, 0, 0};
-#else
-static SPIConfig spiConfig = {false, NULL, 0, 0, 0, 0};
-#endif
+static SPIConfig spiConfig = {0};
 
 __attribute__((weak)) void spi_init(void) {
     static bool is_initialised = false;
@@ -199,7 +195,25 @@ bool spi_start(pin_t slavePin, bool lsbFirst, uint8_t mode, uint16_t divisor) {
             spiConfig.SSPCR0 |= SPI_SSPCR0_SPH; // Clock phase: sample on second edge transition
             break;
     }
+#elif defined(QMK_MCU_SERIES_STM32H7XX)
+    // STM32H7xx use ChibiOS' SPIv3 driver, not compatible
+
+    spiConfig.cfg1 = 0 // start everything at 0, we'll config what we need
+        | SPI_CFG1_MBR_2 | SPI_CFG1_MBR_1 | SPI_CFG1_MBR_0 // max divisor, slowest speed
+        | SPI_CFG1_DSIZE_2 | SPI_CFG1_DSIZE_1 | SPI_CFG1_DSIZE_0 // bits in data frame == 8
+    ;
+
+    // [1:0] = 0 => full duplex
+    spiConfig.cfg2 = 0 // start everything at 0, we'll config what we need
+        | SPI_CFG2_SSOE // SS enabled (no multi-master compat)
+    ;
+
+    // TODO:
+    // switch (mode) SPI_CFG2_CPOL SPI_CFG2_CPHA
+    // if (lsb_first) SPI_CFG2_LSBFRST
+
 #else
+
     spiConfig.cr1 = 0;
 
     if (lsbFirst) {
