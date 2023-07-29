@@ -3,9 +3,8 @@
 
 #pragma once
 
-#include_next <board.h>
+#define USB_DRIVER USBD1
 
-#undef STM32_HSECLK
-#define STM32_HSECLK 25000000U
-
-#undef STM32_HSE_BYPASS
+#ifndef EARLY_INIT_PERFORM_BOOTLOADER_JUMP
+#    define EARLY_INIT_PERFORM_BOOTLOADER_JUMP TRUE
+#endif

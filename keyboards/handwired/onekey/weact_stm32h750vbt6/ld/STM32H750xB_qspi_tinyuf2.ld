@@ -27,22 +27,22 @@
  */
 MEMORY
 {
-    flash0 : org = 0x90000000, len = 8m /* QSPI flash */
-    flash1 : org = 0x00000000, len = 0
-    flash2 : org = 0x00000000, len = 0
-    flash3 : org = 0x00000000, len = 0
-    flash4 : org = 0x00000000, len = 0
-    flash5 : org = 0x00000000, len = 0
-    flash6 : org = 0x00000000, len = 0
-    flash7 : org = 0x00000000, len = 0
-    ram0   : org = 0x24000000, len = 512K
-    ram1   : org = 0x30000000, len = 128K
-    ram2   : org = 0x30020000, len = 128K
-    ram3   : org = 0x30040000, len = 32K
-    ram4   : org = 0x38000000, len = 64k       /* AHB SRAM4 */
-    ram5   : org = 0x20000000, len = 64k       /* DTCM-RAM */
-    ram6   : org = 0x00000000, len = 64k       /* ITCM-RAM */
-    ram7   : org = 0x38800000, len = 4k        /* BCKP SRAM */
+    flash0  : org = 0x90000000, len = 8m        /* Flash bank 1 */
+    flash1  : org = 0x00000000, len = 0
+    flash2  : org = 0x00000000, len = 0
+    flash3  : org = 0x00000000, len = 0
+    flash4  : org = 0x00000000, len = 0
+    flash5  : org = 0x00000000, len = 0
+    flash6  : org = 0x00000000, len = 0
+    flash7  : org = 0x00000000, len = 0
+    ram0    : org = 0x24000000, len = 512k      /* AXI SRAM */
+    ram1    : org = 0x30000000, len = 256k      /* AHB SRAM1+SRAM2 */
+    ram2    : org = 0x30000000, len = 288k      /* AHB SRAM1+SRAM2+SRAM3 */
+    ram3    : org = 0x30040000, len = 32k       /* AHB SRAM3 */
+    ram4    : org = 0x38000000, len = 64k       /* AHB SRAM4 */
+    ram5    : org = 0x20000000, len = 64k       /* DTCM-RAM, as per uf2 ld */
+    ram6    : org = 0x00000000, len = 64k       /* ITCM-RAM */
+    ram7    : org = 0x38800000, len = 4k        /* BCKP SRAM */
 }
 
 /* For each data/text section two region are defined, a virtual region
@@ -137,6 +137,5 @@ INCLUDE rules_data.ld
 /* Memory rules inclusion.*/
 INCLUDE rules_memory.ld
 
-
 /* TinyUF2 bootloader reset support */
-_board_dfu_dbl_tap = ORIGIN(ram5) + 64k; /* this is based off the linker file for tinyuf2 */
+_board_dfu_dbl_tap = ORIGIN(ram5) + LENGTH(ram5); /* this is based off the linker file for tinyuf2 */
