@@ -33,7 +33,7 @@
 /*
  * Board identifier.
  */
-#define BOARD_WeAct_STM32H750VBT6_MINI
+#define BOARD_WEACT_STM32H750VBT6
 #define BOARD_NAME                  "WeAct STM32H750VBT6"
 
 /*

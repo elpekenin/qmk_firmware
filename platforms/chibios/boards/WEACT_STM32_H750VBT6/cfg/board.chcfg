@@ -9,7 +9,7 @@
     <hal_version>5.0.x</hal_version>
   </configuration_settings>
   <board_name>WeAct STM32H750VBT6</board_name>
-  <board_id>WeAct_STM32H750VBT6_MINI</board_id>
+  <board_id>WEACT_STM32H750VBT6</board_id>
   <board_functions></board_functions>
   <headers></headers>
   <ethernet_phy>
@@ -19,7 +19,7 @@
   <subtype>STM32H750xx</subtype>
   <clocks
     HSEFrequency="25000000"
-    HSEBypass="true"
+    HSEBypass="false"
     LSEFrequency="32768"
     LSEBypass="false"
     VDD="300"

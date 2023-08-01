@@ -27,7 +27,7 @@
  */
 MEMORY
 {
-    flash0  : org = 0x90000000, len = 8m        /* Flash bank 1 */
+    flash0  : org = 0x90000000, len = 8m        /* QSPI Flash */
     flash1  : org = 0x00000000, len = 0
     flash2  : org = 0x00000000, len = 0
     flash3  : org = 0x00000000, len = 0

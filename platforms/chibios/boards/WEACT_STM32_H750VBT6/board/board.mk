@@ -2,7 +2,7 @@
 BOARDSRC = $(BOARD_PATH)/board/board.c
 
 # Required include directories
-BOARDINC = $(CHIBIOS)/os/hal/boards/WEACT_STM32H750VBT6_MINI
+BOARDINC = $(BOARD_PATH)/configs
 
 # Shared variables
 ALLCSRC += $(BOARDSRC)

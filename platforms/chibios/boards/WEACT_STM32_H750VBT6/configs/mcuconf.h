@@ -157,7 +157,7 @@
 #define STM32_RTCPRE_VALUE                  8
 #define STM32_CKPERSEL                      STM32_CKPERSEL_HSE_CK
 #define STM32_SDMMCSEL                      STM32_SDMMCSEL_PLL1_Q_CK
-#define STM32_QSPISEL                       STM32_QSPISEL_PLL2_R_CK
+#define STM32_QSPISEL                       STM32_QSPISEL_PLL1_Q_CK
 #define STM32_FMCSEL                        STM32_QSPISEL_HCLK
 
 #define STM32_SWPSEL                        STM32_SWPSEL_PCLK1
@@ -406,10 +406,10 @@
 /*
  * SPI driver system settings.
  */
-#define STM32_SPI_USE_SPI1                  FALSE
+#define STM32_SPI_USE_SPI1                  TRUE
 #define STM32_SPI_USE_SPI2                  FALSE
 #define STM32_SPI_USE_SPI3                  FALSE
-#define STM32_SPI_USE_SPI4                  FALSE
+#define STM32_SPI_USE_SPI4                  TRUE
 #define STM32_SPI_USE_SPI5                  FALSE
 #define STM32_SPI_USE_SPI6                  FALSE
 #define STM32_SPI_SPI1_RX_DMA_STREAM        STM32_DMA_STREAM_ID_ANY
