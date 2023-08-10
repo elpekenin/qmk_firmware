@@ -74,15 +74,8 @@ bool qp_sharp_panel_flush(painter_device_t device) {
     }
 
     // find out dirty area
-    uint8_t top;
-    uint8_t bottom;
-    if (mip_dev->base.rotation == QP_ROTATION_0 || mip_dev->base.rotation == QP_ROTATION_180) {
-        top    = (uint8_t)dirty.t;
-        bottom = (uint8_t)dirty.b;
-    } else {
-        top    = (uint8_t)dirty.l;
-        bottom = (uint8_t)dirty.r;
-    }
+    uint8_t top    = (uint8_t)dirty.t;
+    uint8_t bottom = (uint8_t)dirty.b;
 
     // bytes sent for each row's data
     uint8_t bytes_per_line = (mip_dev->base.panel_width + 7) / 8 * mip_dev->base.native_bits_per_pixel;
