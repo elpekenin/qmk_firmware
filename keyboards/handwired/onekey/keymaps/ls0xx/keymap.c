@@ -29,10 +29,13 @@ uint32_t deferred_init(uint32_t trigger_time, void *cb_arg) {
     return 0;
 }
 
+#define WIDTH 128
+#define HEIGHT 128
+static uint8_t buf[SURFACE_REQUIRED_BUFFER_BYTE_SIZE(WIDTH, HEIGHT, 1)] = {0};
 void keyboard_post_init_user(void) {
     debug_enable = true;
 
-    display = qp_ls011b7dh03_make_spi_device(CS_PIN, SPI_DIV, 0);
+    display = qp_ls0xx_device_t_make_spi_device(WIDTH, HEIGHT, CS_PIN, SPI_DIV, 0, buf);
 
     gif = qp_load_image_mem(gfx_bw);
     font = qp_load_font_mem(font_fira_code);
