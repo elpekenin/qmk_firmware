@@ -14,13 +14,6 @@
     limitations under the License.
 */
 
-/* NOTE: Copied from lib/chibios/demos/STM32/RT-STM32H750XB-DISCOVERY/cfg/mcuconf.h
- *
- * CHANGED:
- *    - STM32_USB_USE_OTG2 to TRUE
- *    - Timer config based on <https://github.com/ArduPilot/ardupilot/blob/master/libraries/AP_HAL_ChibiOS/hwdef/common/stm32h7_mcuconf.h>
- */
-
 #ifndef MCUCONF_H
 #define MCUCONF_H
 
@@ -71,7 +64,7 @@
  * Clock tree static settings.
  * Reading STM32 Reference Manual is required.
  */
- #if STM32_HSECLK == 25000000U
+#if STM32_HSECLK == 25000000U
 // this gives 400MHz system clock
 #define STM32_HSE_ENABLED                   TRUE
 #define STM32_HSI_ENABLED                   FALSE
@@ -156,7 +149,7 @@
 #define STM32_RTCPRE_VALUE                  8
 #define STM32_CKPERSEL                      STM32_CKPERSEL_HSE_CK
 #define STM32_SDMMCSEL                      STM32_SDMMCSEL_PLL1_Q_CK
-#define STM32_QSPISEL                       STM32_QSPISEL_PLL2_R_CK
+#define STM32_QSPISEL                       STM32_QSPISEL_PLL1_Q_CK
 #define STM32_FMCSEL                        STM32_QSPISEL_HCLK
 
 #define STM32_SWPSEL                        STM32_SWPSEL_PCLK1
@@ -368,7 +361,7 @@
 /*
  * SDC driver system settings.
  */
-#define STM32_SDC_USE_SDMMC1                TRUE
+#define STM32_SDC_USE_SDMMC1                FALSE
 #define STM32_SDC_USE_SDMMC2                FALSE
 #define STM32_SDC_SDMMC_UNALIGNED_SUPPORT   TRUE
 #define STM32_SDC_SDMMC_WRITE_TIMEOUT       10000
@@ -381,7 +374,7 @@
  */
 #define STM32_SERIAL_USE_USART1             FALSE
 #define STM32_SERIAL_USE_USART2             FALSE
-#define STM32_SERIAL_USE_USART3             TRUE
+#define STM32_SERIAL_USE_USART3             FALSE
 #define STM32_SERIAL_USE_UART4              FALSE
 #define STM32_SERIAL_USE_UART5              FALSE
 #define STM32_SERIAL_USE_USART6             FALSE

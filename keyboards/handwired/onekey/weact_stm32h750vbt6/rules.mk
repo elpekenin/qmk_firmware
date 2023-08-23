@@ -1,1 +1,1 @@
-BOARD = WEACT_STM32_H750VBT6
+# Intentionally left blank

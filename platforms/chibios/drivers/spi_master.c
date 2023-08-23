@@ -196,21 +196,56 @@ bool spi_start(pin_t slavePin, bool lsbFirst, uint8_t mode, uint16_t divisor) {
             break;
     }
 #elif defined(QMK_MCU_SERIES_STM32H7XX)
-    // STM32H7xx use ChibiOS' SPIv3 driver, not compatible
+    spiConfig.cfg1 = 0;
+    spiConfig.cfg2 = 0;
 
-    spiConfig.cfg1 = 0 // start everything at 0, we'll config what we need
-        | SPI_CFG1_MBR_2 | SPI_CFG1_MBR_1 | SPI_CFG1_MBR_0 // max divisor, slowest speed
-        | SPI_CFG1_DSIZE_2 | SPI_CFG1_DSIZE_1 | SPI_CFG1_DSIZE_0 // bits in data frame == 8
-    ;
+    if (lsbFirst) {
+        spiConfig.cfg2 |= SPI_CFG2_LSBFRST;
+    }
 
-    // [1:0] = 0 => full duplex
-    spiConfig.cfg2 = 0 // start everything at 0, we'll config what we need
-        | SPI_CFG2_SSOE // SS enabled (no multi-master compat)
-    ;
+    switch (mode) {
+        case 0:
+            break;
+        case 1:
+            spiConfig.cfg2 |= SPI_CFG2_CPHA;
+            break;
+        case 2:
+            spiConfig.cfg2 |= SPI_CFG2_CPOL;
+            break;
+        case 3:
+            spiConfig.cfg2 |= SPI_CFG2_CPHA | SPI_CFG2_CPOL;
+            break;
+    }
 
-    // TODO:
-    // switch (mode) SPI_CFG2_CPOL SPI_CFG2_CPHA
-    // if (lsb_first) SPI_CFG2_LSBFRST
+    switch (roundedDivisor) {
+        case 2:
+            break;
+        case 4:
+            spiConfig.cfg1 |= SPI_CFG1_MBR_0;
+            break;
+        case 8:
+            spiConfig.cfg1 |= SPI_CFG1_MBR_1;
+            break;
+        case 16:
+            spiConfig.cfg1 |= SPI_CFG1_MBR_1 | SPI_CFG1_MBR_0;
+            break;
+        case 32:
+            spiConfig.cfg1 |= SPI_CFG1_MBR_2;
+            break;
+        case 64:
+            spiConfig.cfg1 |= SPI_CFG1_MBR_2 | SPI_CFG1_MBR_0;
+            break;
+        case 128:
+            spiConfig.cfg1 |= SPI_CFG1_MBR_2 | SPI_CFG1_MBR_1;
+            break;
+        case 256:
+            spiConfig.cfg1 |= SPI_CFG1_MBR_2 | SPI_CFG1_MBR_1 | SPI_CFG1_MBR_0;
+            break;
+    }
+
+    spiConfig.cfg1 |= SPI_CFG1_DSIZE_2 | SPI_CFG1_DSIZE_1 | SPI_CFG1_DSIZE_0; // 8bit data frame
+
+    spiConfig.cfg2 |= SPI_CFG2_SSOE; // SS enabled (no multi-master compat)
 
 #else
 

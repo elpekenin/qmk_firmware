@@ -3,8 +3,10 @@
 
 #pragma once
 
-#define USB_DRIVER USBD1
+#undef HAL_USE_SPI
+#define HAL_USE_SPI TRUE
 
-#ifndef EARLY_INIT_PERFORM_BOOTLOADER_JUMP
-#    define EARLY_INIT_PERFORM_BOOTLOADER_JUMP TRUE
-#endif
+#undef SPI_USE_WAIT
+#define SPI_USE_WAIT TRUE
+
+#include_next <halconf.h>
