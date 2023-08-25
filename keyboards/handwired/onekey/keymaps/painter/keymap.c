@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 #include QMK_KEYBOARD_H
+#include "color.h"
 #include "qp.h"
-
 
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
@@ -14,11 +14,12 @@ painter_device_t lcd;
 
 uint32_t deferred_init(uint32_t trigger_time, void *cb_arg) {
     setPinOutput(LCD_BL_PIN);
-    writePinHigh(LCD_BL_PIN);
+    writePinLow(LCD_BL_PIN);
 
-    lcd = qp_st7735_make_spi_device(80, 160, LCD_CS_PIN, LCD_DC_PIN, LCD_RST_PIN, 32, 3);
+    dprintf("Hello world!\n");
+    lcd = qp_st7735_make_spi_device(80, 160, LCD_CS_PIN, LCD_DC_PIN, LCD_RST_PIN, 256, 0);
     qp_init(lcd, QP_ROTATION_0);
-    qp_rect(lcd, 0, 0, 60, 150, 0, 255, 255, true);
+    qp_rect(lcd, 0, 0, 79, 159, HSV_RED, true);
 
     return 0;
 }
