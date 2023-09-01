@@ -581,11 +581,11 @@
  * PC5  - PIN5                      (input floating).
  * PC6  - DCMI_D0                   (input floating).
  * PC7  - DCMI_D1                   (input floating).
- * PC8  - SD_D0                     (input floating).
- * PC9  - SD_D1                     (input floating).
- * PC10 - SD_D2                     (input floating).
- * PC11 - SD_D3                     (input floating).
- * PC12 - SD_CK                     (input floating).
+ * PC8  - SD_D0                     (alternate 12).
+ * PC9  - SD_D1                     (alternate 12).
+ * PC10 - SD_D2                     (alternate 12).
+ * PC11 - SD_D3                     (alternate 12).
+ * PC12 - SD_CK                     (alternate 12).
  * PC13 - BUTTON                    (input floating).
  * PC14 - OSC32_IN                  (input floating).
  * PC15 - OSC32_OUT                 (output pushpull minimum).
@@ -598,11 +598,11 @@
                                      PIN_MODE_INPUT(GPIOC_PIN5) |           \
                                      PIN_MODE_INPUT(GPIOC_DCMI_D0) |        \
                                      PIN_MODE_INPUT(GPIOC_DCMI_D1) |        \
-                                     PIN_MODE_INPUT(GPIOC_SD_D0) |          \
-                                     PIN_MODE_INPUT(GPIOC_SD_D1) |          \
-                                     PIN_MODE_INPUT(GPIOC_SD_D2) |          \
-                                     PIN_MODE_INPUT(GPIOC_SD_D3) |          \
-                                     PIN_MODE_INPUT(GPIOC_SD_CK) |          \
+                                     PIN_MODE_ALTERNATE(GPIOC_SD_D0) |      \
+                                     PIN_MODE_ALTERNATE(GPIOC_SD_D1) |      \
+                                     PIN_MODE_ALTERNATE(GPIOC_SD_D2) |      \
+                                     PIN_MODE_ALTERNATE(GPIOC_SD_D3) |      \
+                                     PIN_MODE_ALTERNATE(GPIOC_SD_CK) |      \
                                      PIN_MODE_INPUT(GPIOC_BUTTON) |         \
                                      PIN_MODE_INPUT(GPIOC_OSC32_IN) |       \
                                      PIN_MODE_OUTPUT(GPIOC_OSC32_OUT))
@@ -692,7 +692,7 @@
  *
  * PD0  - PIN0                      (input floating).
  * PD1  - PIN1                      (input floating).
- * PD2  - SD_CMD                    (input floating).
+ * PD2  - SD_CMD                    (alternate 12).
  * PD3  - DCMI_D5                   (input floating).
  * PD4  - SD_SW                     (input floating).
  * PD5  - PIN5                      (input floating).
@@ -709,7 +709,7 @@
  */
 #define VAL_GPIOD_MODER             (PIN_MODE_INPUT(GPIOD_PIN0) |           \
                                      PIN_MODE_INPUT(GPIOD_PIN1) |           \
-                                     PIN_MODE_INPUT(GPIOD_SD_CMD) |         \
+                                     PIN_MODE_ALTERNATE(GPIOD_SD_CMD) |     \
                                      PIN_MODE_INPUT(GPIOD_DCMI_D5) |        \
                                      PIN_MODE_INPUT(GPIOD_SD_SW) |          \
                                      PIN_MODE_INPUT(GPIOD_PIN5) |           \
