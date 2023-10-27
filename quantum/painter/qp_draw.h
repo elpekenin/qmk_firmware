@@ -12,6 +12,8 @@
 // Global variable used for native pixel data streaming.
 extern uint8_t qp_internal_global_pixdata_buffer[QUANTUM_PAINTER_PIXDATA_BUFFER_SIZE];
 
+extern uint8_t qp_internal_global_transparency_buffer[QUANTUM_PAINTER_PIXDATA_BUFFER_SIZE];
+
 // Check if the supplied bpp is capable of being rendered
 bool qp_internal_bpp_capable(uint8_t bits_per_pixel);
 
@@ -52,7 +54,7 @@ bool qp_internal_interpolate_palette(qp_pixel_t fg_hsv888, qp_pixel_t bg_hsv888,
 void qp_internal_invalidate_palette(void);
 
 // Helper shared between image and font rendering -- sets up the global palette to match the palette block specified in the asset. Expects the stream to be positioned at the start of the block header.
-bool qp_internal_load_qgf_palette(qp_stream_t* stream, uint8_t bpp);
+bool qp_internal_load_qgf_palette(qp_stream_t* stream, uint8_t bpp, uint8_t transparency_index);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Quantum Painter codec functions

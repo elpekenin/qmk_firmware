@@ -21,6 +21,7 @@ _Static_assert((QUANTUM_PAINTER_PIXDATA_BUFFER_SIZE > 0) && (QUANTUM_PAINTER_PIX
 
 // Buffer used for transmitting native pixel data to the downstream device.
 __attribute__((__aligned__(4))) uint8_t qp_internal_global_pixdata_buffer[QUANTUM_PAINTER_PIXDATA_BUFFER_SIZE];
+__attribute__((__aligned__(4))) uint8_t qp_internal_global_transparency_buffer[QUANTUM_PAINTER_PIXDATA_BUFFER_SIZE];
 
 // Static buffer to contain a generated color palette
 static bool                                       generated_palette = false;
@@ -51,7 +52,7 @@ bool qp_internal_setpixel_impl(painter_device_t device, uint16_t x, uint16_t y) 
 void qp_internal_fill_pixdata(painter_device_t device, uint32_t num_pixels, uint8_t hue, uint8_t sat, uint8_t val) {
     painter_driver_t *driver            = (painter_driver_t *)device;
     uint32_t          pixels_in_pixdata = qp_internal_num_pixels_in_buffer(device);
-    num_pixels                          = QP_MIN(pixels_in_pixdata, num_pixels);
+    num_pixels                          = MIN(pixels_in_pixdata, num_pixels);
 
     // Convert the color to native pixel format
     qp_pixel_t color = {.hsv888 = {.h = hue, .s = sat, .v = val}};
@@ -108,7 +109,7 @@ bool qp_internal_interpolate_palette(qp_pixel_t fg_hsv888, qp_pixel_t bg_hsv888,
 }
 
 // Helper shared between image and font rendering -- sets up the global palette to match the palette block specified in the asset. Expects the stream to be positioned at the start of the block header.
-bool qp_internal_load_qgf_palette(qp_stream_t *stream, uint8_t bpp) {
+bool qp_internal_load_qgf_palette(qp_stream_t *stream, uint8_t bpp, uint8_t transparency_index) {
     qgf_palette_v1_t palette_descriptor;
     if (qp_stream_read(&palette_descriptor, sizeof(qgf_palette_v1_t), 1, stream) != 1) {
         qp_dprintf("Failed to read palette_descriptor, expected length was not %d\n", (int)sizeof(qgf_palette_v1_t));
@@ -134,7 +135,17 @@ bool qp_internal_load_qgf_palette(qp_stream_t *stream, uint8_t bpp) {
         qp_internal_global_pixel_lookup_table[i].hsv888.s = entry.s;
         qp_internal_global_pixel_lookup_table[i].hsv888.v = entry.v;
 
-        qp_dprintf("qp_internal_load_qgf_palette: %3d of %d -- H: %3d, S: %3d, V: %3d\n", (int)(i + 1), (int)palette_entries, (int)qp_internal_global_pixel_lookup_table[i].hsv888.h, (int)qp_internal_global_pixel_lookup_table[i].hsv888.s, (int)qp_internal_global_pixel_lookup_table[i].hsv888.v);
+        qp_internal_global_pixel_lookup_table[i].transparency = i == transparency_index;
+
+        qp_dprintf(
+            "qp_internal_load_qgf_palette: %3d of %d -- H: %3d, S: %3d, V: %3d -- transparent: %s\n",
+            (int)(i + 1),
+            (int)palette_entries,
+            (int)qp_internal_global_pixel_lookup_table[i].hsv888.h,
+            (int)qp_internal_global_pixel_lookup_table[i].hsv888.s,
+            (int)qp_internal_global_pixel_lookup_table[i].hsv888.v,
+            qp_internal_global_pixel_lookup_table[i].transparency ? "true" : "false"
+        );
     }
 
     return true;
@@ -231,17 +242,17 @@ bool qp_internal_fillrect_helper_impl(painter_device_t device, uint16_t left, ui
     uint32_t          pixels_in_pixdata = qp_internal_num_pixels_in_buffer(device);
     painter_driver_t *driver            = (painter_driver_t *)device;
 
-    uint16_t l = QP_MIN(left, right);
-    uint16_t r = QP_MAX(left, right);
-    uint16_t t = QP_MIN(top, bottom);
-    uint16_t b = QP_MAX(top, bottom);
+    uint16_t l = MIN(left, right);
+    uint16_t r = MAX(left, right);
+    uint16_t t = MIN(top, bottom);
+    uint16_t b = MAX(top, bottom);
     uint16_t w = r - l + 1;
     uint16_t h = b - t + 1;
 
     uint32_t remaining = w * h;
     driver->driver_vtable->viewport(device, l, t, r, b);
     while (remaining > 0) {
-        uint32_t transmit = QP_MIN(remaining, pixels_in_pixdata);
+        uint32_t transmit = MIN(remaining, pixels_in_pixdata);
         if (!driver->driver_vtable->pixdata(device, qp_internal_global_pixdata_buffer, transmit)) {
             return false;
         }
@@ -259,10 +270,10 @@ bool qp_rect(painter_device_t device, uint16_t left, uint16_t top, uint16_t righ
     }
 
     // Cater for cases where people have submitted the coordinates backwards
-    uint16_t l = QP_MIN(left, right);
-    uint16_t r = QP_MAX(left, right);
-    uint16_t t = QP_MIN(top, bottom);
-    uint16_t b = QP_MAX(top, bottom);
+    uint16_t l = MIN(left, right);
+    uint16_t r = MAX(left, right);
+    uint16_t t = MIN(top, bottom);
+    uint16_t b = MAX(top, bottom);
     uint16_t w = r - l + 1;
     uint16_t h = b - t + 1;
 
@@ -280,7 +291,7 @@ bool qp_rect(painter_device_t device, uint16_t left, uint16_t top, uint16_t righ
         ret = qp_internal_fillrect_helper_impl(device, l, t, r, b);
     } else {
         // Fill up the pixdata buffer with the required number of native pixels
-        qp_internal_fill_pixdata(device, QP_MAX(w, h), hue, sat, val);
+        qp_internal_fill_pixdata(device, MAX(w, h), hue, sat, val);
 
         // Draw 4x filled single-width rects to create an outline
         if (!qp_internal_fillrect_helper_impl(device, l, t, r, t) || !qp_internal_fillrect_helper_impl(device, l, b, r, b) || !qp_internal_fillrect_helper_impl(device, l, t + 1, l, b - 1) || !qp_internal_fillrect_helper_impl(device, r, t + 1, r, b - 1)) {

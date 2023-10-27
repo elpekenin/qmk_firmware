@@ -9,27 +9,38 @@
 // Quantum Painter pixel formats
 
 // Datatype containing a pixel's color. The internal member used is dependent on the external context.
-typedef union QP_PACKED qp_pixel_t {
-    uint8_t mono;
-    uint8_t palette_idx;
+typedef struct PACKED qp_pixel_t {
+    union PACKED {
+        uint8_t mono;
+        uint8_t palette_idx;
 
-    struct QP_PACKED {
-        uint8_t h;
-        uint8_t s;
-        uint8_t v;
-    } hsv888;
+        struct PACKED {
+            uint8_t h;
+            uint8_t s;
+            uint8_t v;
+        } hsv888;
 
-    struct QP_PACKED {
-        uint8_t r;
-        uint8_t g;
-        uint8_t b;
-    } rgb888;
+        struct PACKED {
+            uint8_t r;
+            uint8_t g;
+            uint8_t b;
+        } rgb888;
 
-    uint16_t rgb565;
+        uint16_t rgb565;
 
-    uint32_t dummy;
+        uint32_t dummy;
+    };
+
+    union PACKED {
+        struct PACKED {
+            uint8_t transparency: 1;
+            uint8_t delta: 1;
+            uint8_t reserved: 6;
+        };
+        uint8_t flags;
+    };
 } qp_pixel_t;
-_Static_assert(sizeof(qp_pixel_t) == 4, "Invalid size for qp_pixel_t");
+_Static_assert(sizeof(qp_pixel_t) == 5, "Invalid size for qp_pixel_t");
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Quantum Painter image format

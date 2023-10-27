@@ -10,7 +10,7 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // QFF API
 
-bool qff_read_font_descriptor(qp_stream_t *stream, uint8_t *line_height, bool *has_ascii_table, uint16_t *num_unicode_glyphs, uint8_t *bpp, bool *has_palette, bool *is_panel_native, painter_compression_t *compression_scheme, uint32_t *total_bytes) {
+bool qff_read_font_descriptor(qp_stream_t *stream, uint8_t *line_height, bool *has_ascii_table, uint16_t *num_unicode_glyphs, uint8_t *bpp, bool *has_palette, uint8_t *transparency_index, bool *is_panel_native, painter_compression_t *compression_scheme, uint32_t *total_bytes) {
     // Seek to the start
     qp_stream_setpos(stream, 0);
 
@@ -53,6 +53,11 @@ bool qff_read_font_descriptor(qp_stream_t *stream, uint8_t *line_height, bool *h
             return false;
         }
     }
+
+    if (transparency_index) {
+        *transparency_index = font_descriptor.transparency_index;
+    }
+
     if (compression_scheme) {
         *compression_scheme = font_descriptor.compression_scheme;
     }
@@ -102,7 +107,7 @@ bool qff_validate_stream(qp_stream_t *stream) {
     bool     has_ascii_table;
     uint16_t num_unicode_glyphs;
 
-    if (!qff_read_font_descriptor(stream, NULL, &has_ascii_table, &num_unicode_glyphs, NULL, NULL, NULL, NULL, NULL)) {
+    if (!qff_read_font_descriptor(stream, NULL, &has_ascii_table, &num_unicode_glyphs, NULL, NULL, NULL, NULL, NULL, NULL)) {
         return false;
     }
 
@@ -127,7 +132,7 @@ uint32_t qff_get_total_size(qp_stream_t *stream) {
 
     // Read the font descriptor, grabbing the size
     uint32_t total_size;
-    if (!qff_read_font_descriptor(stream, NULL, NULL, NULL, NULL, NULL, NULL, NULL, &total_size)) {
+    if (!qff_read_font_descriptor(stream, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, &total_size)) {
         return false;
     }
 

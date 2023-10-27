@@ -19,6 +19,7 @@ typedef struct qff_font_handle_t {
     uint16_t              num_unicode_glyphs;
     uint8_t               bpp;
     bool                  has_palette;
+    uint8_t               transparency_index;
     bool                  is_panel_native;
     painter_compression_t compression_scheme;
     union {
@@ -98,7 +99,7 @@ static painter_font_handle_t qp_load_font_internal(bool (*stream_factory)(qff_fo
 #endif // QUANTUM_PAINTER_LOAD_FONTS_TO_RAM
 
     // Read the info (parsing already successful above, no need to check return value)
-    qff_read_font_descriptor(&font->stream, &font->base.line_height, &font->has_ascii_table, &font->num_unicode_glyphs, &font->bpp, &font->has_palette, &font->is_panel_native, &font->compression_scheme, NULL);
+    qff_read_font_descriptor(&font->stream, &font->base.line_height, &font->has_ascii_table, &font->num_unicode_glyphs, &font->bpp, &font->has_palette, &font->transparency_index ,&font->is_panel_native, &font->compression_scheme, NULL);
 
     if (!qp_internal_bpp_capable(font->bpp)) {
         qp_dprintf("qp_load_font: fail (image bpp too high (%d), check QUANTUM_PAINTER_SUPPORTS_256_PALETTE or QUANTUM_PAINTER_SUPPORTS_NATIVE_COLORS)\n", (int)font->bpp);
@@ -188,7 +189,7 @@ static inline bool qp_drawtext_prepare_font_for_render(painter_device_t device, 
     if (qff_font->has_palette) {
         // If this font has a palette, we need to read it out and set up the pixel lookup table
         qp_stream_setpos(&qff_font->stream, offset);
-        if (!qp_internal_load_qgf_palette(&qff_font->stream, qff_font->bpp)) {
+        if (!qp_internal_load_qgf_palette(&qff_font->stream, qff_font->bpp, qff_font->transparency_index)) {
             return false;
         }
 
@@ -446,8 +447,6 @@ int16_t qp_drawtext_recolor(painter_device_t device, uint16_t x, uint16_t y, pai
                                                // Output
                                                .output_state = &output_state};
 
-    qp_pixel_t fg_hsv888 = {.hsv888 = {.h = hue_fg, .s = sat_fg, .v = val_fg}};
-    qp_pixel_t bg_hsv888 = {.hsv888 = {.h = hue_bg, .s = sat_bg, .v = val_bg}};
     uint32_t   data_offset;
     if (!qp_drawtext_prepare_font_for_render(driver, qff_font, fg_hsv888, bg_hsv888, &data_offset)) {
         qp_dprintf("qp_drawtext_recolor: fail (failed to prepare font for rendering)\n");

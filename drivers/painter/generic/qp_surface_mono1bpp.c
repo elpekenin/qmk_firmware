@@ -40,16 +40,22 @@ static inline void setpixel_mono1bpp(surface_painter_device_t *surface, uint16_t
     }
 }
 
-static inline void append_pixel_mono1bpp(surface_painter_device_t *surface, bool mono_pixel) {
-    setpixel_mono1bpp(surface, surface->viewport.pixdata_x, surface->viewport.pixdata_y, mono_pixel);
-    qp_surface_increment_pixdata_location(&surface->viewport);
-}
-
 static inline void stream_pixdata_mono1bpp(surface_painter_device_t *surface, const uint8_t *data, uint32_t native_pixel_count) {
     for (uint32_t pixel_counter = 0; pixel_counter < native_pixel_count; ++pixel_counter) {
         uint32_t byte_offset = pixel_counter / 8;
         uint8_t  bit_offset  = pixel_counter % 8;
-        append_pixel_mono1bpp(surface, (data[byte_offset] & (1 << bit_offset)) ? true : false);
+
+        uint8_t bitmask = 1 << bit_offset;
+        bool mono_pixel = data[byte_offset] & bitmask;
+        bool transparent = qp_internal_global_transparency_buffer[byte_offset] & bitmask;
+
+        // dont draw if pixel is transparent
+        if (!transparent) {
+            setpixel_mono1bpp(surface, surface->viewport.pixdata_x, surface->viewport.pixdata_y, mono_pixel);
+        }
+
+        // update location
+        qp_surface_increment_pixdata_location(&surface->viewport);
     }
 }
 
@@ -75,11 +81,21 @@ static bool qp_surface_append_pixels_mono1bpp(painter_device_t device, uint8_t *
         uint32_t pixel_num   = pixel_offset + i;
         uint32_t byte_offset = pixel_num / 8;
         uint8_t  bit_offset  = pixel_num % 8;
-        if (palette[palette_indices[i]].mono) {
-            target_buffer[byte_offset] |= (1 << bit_offset);
+
+        qp_pixel_t pixel = palette[palette_indices[i]];
+        uint8_t bitmask = (1 << bit_offset);
+        if (pixel.mono) {
+            target_buffer[byte_offset] |= bitmask;
         } else {
-            target_buffer[byte_offset] &= ~(1 << bit_offset);
+            target_buffer[byte_offset] &= ~bitmask;
         }
+
+        if (pixel.transparency) {
+            qp_internal_global_transparency_buffer[byte_offset] |= bitmask;
+        } else {
+            qp_internal_global_transparency_buffer[byte_offset] &= ~bitmask;
+        }
+
     }
     return true;
 }
