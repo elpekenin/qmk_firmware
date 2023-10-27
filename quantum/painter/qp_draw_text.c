@@ -447,6 +447,8 @@ int16_t qp_drawtext_recolor(painter_device_t device, uint16_t x, uint16_t y, pai
                                                // Output
                                                .output_state = &output_state};
 
+    qp_pixel_t fg_hsv888 = {.hsv888 = {.h = hue_fg, .s = sat_fg, .v = val_fg}};
+    qp_pixel_t bg_hsv888 = {.hsv888 = {.h = hue_bg, .s = sat_bg, .v = val_bg}};
     uint32_t   data_offset;
     if (!qp_drawtext_prepare_font_for_render(driver, qff_font, fg_hsv888, bg_hsv888, &data_offset)) {
         qp_dprintf("qp_drawtext_recolor: fail (failed to prepare font for rendering)\n");

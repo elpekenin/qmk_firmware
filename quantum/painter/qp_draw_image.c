@@ -298,6 +298,8 @@ static bool qp_drawimage_recolor_impl(painter_device_t device, uint16_t x, uint1
 
 bool qp_drawimage_recolor(painter_device_t device, uint16_t x, uint16_t y, painter_image_handle_t image, uint8_t hue_fg, uint8_t sat_fg, uint8_t val_fg, uint8_t hue_bg, uint8_t sat_bg, uint8_t val_bg) {
     qgf_frame_info_t frame_info = {0};
+    qp_pixel_t       fg_hsv888  = {.hsv888 = {.h = hue_fg, .s = sat_fg, .v = val_fg}};
+    qp_pixel_t       bg_hsv888  = {.hsv888 = {.h = hue_bg, .s = sat_bg, .v = val_bg}};
     return qp_drawimage_recolor_impl(device, x, y, image, 0, &frame_info, fg_hsv888, bg_hsv888);
 }
 
