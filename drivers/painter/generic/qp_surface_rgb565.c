@@ -30,14 +30,17 @@ static inline void setpixel_rgb565(surface_painter_device_t *surface, uint16_t x
     }
 }
 
-static inline void append_pixel_rgb565(surface_painter_device_t *surface, uint16_t rgb565) {
-    setpixel_rgb565(surface, surface->viewport.pixdata_x, surface->viewport.pixdata_y, rgb565);
-    qp_surface_increment_pixdata_location(&surface->viewport);
-}
-
 static inline void stream_pixdata_rgb565(surface_painter_device_t *surface, const uint16_t *data, uint32_t native_pixel_count) {
     for (uint32_t pixel_counter = 0; pixel_counter < native_pixel_count; ++pixel_counter) {
-        append_pixel_rgb565(surface, data[pixel_counter]);
+        bool transparent = qp_internal_global_transparency_buffer[pixel_counter];
+
+        // dont draw if pixel is transparent
+        if (!transparent) {
+            setpixel_rgb565(surface, surface->viewport.pixdata_x, surface->viewport.pixdata_y, data[pixel_counter]);
+        }
+
+        // update location
+        qp_surface_increment_pixdata_location(&surface->viewport);
     }
 }
 
@@ -63,7 +66,10 @@ static bool qp_surface_palette_convert_rgb565_swapped(painter_device_t device, i
 static bool qp_surface_append_pixels_rgb565(painter_device_t device, uint8_t *target_buffer, qp_pixel_t *palette, uint32_t pixel_offset, uint32_t pixel_count, uint8_t *palette_indices) {
     uint16_t *buf = (uint16_t *)target_buffer;
     for (uint32_t i = 0; i < pixel_count; ++i) {
-        buf[pixel_offset + i] = palette[palette_indices[i]].rgb565;
+        qp_pixel_t pixel = palette[palette_indices[i]];
+
+        buf[pixel_offset + i] = pixel.rgb565;
+        qp_internal_global_transparency_buffer[pixel_offset + i] = pixel.transparency;
     }
     return true;
 }
