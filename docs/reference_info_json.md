@@ -111,6 +111,13 @@ Configures the [APA102](apa102_driver.md) driver.
 Configures the [Audio](feature_audio.md) feature.
 
 * `audio`
+    * `default`
+        * `on`
+            * The default audio enabled state.
+            * Default: `true`
+        * `clicky`
+            * The default audio clicky enabled state.
+            * Default: `true`
     * `macro_beep`
         * Play a short beep for `\a` (ASCII `BEL`) characters in Send String macros.
         * Default: `false`
@@ -324,6 +331,8 @@ The ISO enter key is represented by a 1.25u×2uh key. Renderers which utilize in
                 * `w`
                     * The width of the key, in key units.
                     * Default: `1` (1u)
+                * `encoder`
+                    * The index of an encoder this key should be linked to
                 * Example: `{"label": "Shift", "matrix": [4, 0], "x": 0, "y": 4.25, "w": 2.25}`
 
 ## Leader Key :id=leader-key

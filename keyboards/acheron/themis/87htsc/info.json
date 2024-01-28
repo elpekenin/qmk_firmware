@@ -21,6 +21,14 @@
         "nkro":      true
     },
     "diode_direction": "COL2ROW",
+    "eeprom": {
+        "wear_leveling": {
+            "backing_size": 8192
+        }
+    },
+    "rgblight": {
+        "led_count": 1
+    },
     "ws2812": {
         "pin": "B15"
     },
