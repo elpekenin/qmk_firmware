@@ -24,3 +24,4 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define RGB_MATRIX_LED_COUNT              49
 
 #define VIA_EEPROM_LAYOUT_OPTIONS_DEFAULT 0x1
+#define RGB_MATRIX_DISABLE_KEYCODES
