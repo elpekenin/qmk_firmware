@@ -23,3 +23,5 @@
 #define NO_ACTION_LAYER
 #define NO_ACTION_TAPPING
 #define NO_ACTION_ONESHOT
+
+#define POWER_LED_PIN F1
