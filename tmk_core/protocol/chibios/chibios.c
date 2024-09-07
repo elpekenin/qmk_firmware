@@ -50,6 +50,11 @@
 
 #define USB_GETSTATUS_REMOTE_WAKEUP_ENABLED (2U)
 
+#ifdef WAIT_FOR_USB
+// TODO: Remove backwards compatibility with old define
+#    define USB_WAIT_FOR_ENUMERATION
+#endif
+
 /* -------------------------
  *   TMK host driver defs
  * -------------------------
@@ -67,17 +72,6 @@ host_driver_t chibios_driver = {keyboard_leds, send_keyboard, send_nkro, send_mo
 
 #ifdef VIRTSER_ENABLE
 void virtser_task(void);
-#endif
-
-#ifdef RAW_ENABLE
-void raw_hid_task(void);
-#endif
-
-#ifdef CONSOLE_ENABLE
-void console_task(void);
-#endif
-#ifdef MIDI_ENABLE
-void midi_ep_task(void);
 #endif
 
 /* TESTING
@@ -153,7 +147,7 @@ void protocol_pre_init(void) {
 
     /* Wait until USB is active */
     while (true) {
-#if defined(WAIT_FOR_USB)
+#if defined(USB_WAIT_FOR_ENUMERATION)
         if (USB_DRIVER.state == USB_ACTIVE) {
             driver = &chibios_driver;
             break;
@@ -189,7 +183,7 @@ void protocol_pre_task(void) {
             /* Do this in the suspended state */
             suspend_power_down(); // on AVR this deep sleeps for 15ms
             /* Remote wakeup */
-            if ((USB_DRIVER.status & USB_GETSTATUS_REMOTE_WAKEUP_ENABLED) && suspend_wakeup_condition()) {
+            if (suspend_wakeup_condition() && (USB_DRIVER.status & USB_GETSTATUS_REMOTE_WAKEUP_ENABLED)) {
                 usbWakeupHost(&USB_DRIVER);
 #    if USB_SUSPEND_WAKEUP_DELAY > 0
                 // Some hubs, kvm switches, and monitors do
@@ -208,17 +202,8 @@ void protocol_pre_task(void) {
 }
 
 void protocol_post_task(void) {
-#ifdef CONSOLE_ENABLE
-    console_task();
-#endif
-#ifdef MIDI_ENABLE
-    midi_ep_task();
-#endif
 #ifdef VIRTSER_ENABLE
     virtser_task();
-#endif
-#ifdef RAW_ENABLE
-    raw_hid_task();
 #endif
     usb_idle_task();
 }
