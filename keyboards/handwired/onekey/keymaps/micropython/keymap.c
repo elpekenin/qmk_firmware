@@ -19,7 +19,7 @@ void housekeeping_task_user(void) {
         done = true;
 
         mp_embed_init(&micropy_heap[0], sizeof(micropy_heap), &stack_top);
-        mp_embed_exec_str("print('hello from micropython!', [x for x in range(5)])");
+        mp_embed_exec_str("import qmk; print(qmk.version)");
         mp_embed_deinit();
     }
 }
