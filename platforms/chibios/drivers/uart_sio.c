@@ -139,6 +139,6 @@ void uart_receive(uint8_t *data, uint16_t length) {
     }
 }
 
-bool uart_available() {
+bool uart_available(void) {
     return !sioIsRXEmptyX(&UART_DRIVER);
 }
