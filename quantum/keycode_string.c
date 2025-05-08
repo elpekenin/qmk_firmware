@@ -195,6 +195,9 @@ static const char* search_table(const keycode_string_name_t* data, uint16_t size
     return NULL;
 }
 
+static const uint8_t ZERO = '0';
+static const uint8_t UPPERCASE_A = 'A';
+
 /** Formats `number` in `base`, either 10 or 16. */
 static char* number_string(uint16_t number, int8_t base) {
     static char result[7];
@@ -203,7 +206,7 @@ static char* number_string(uint16_t number, int8_t base) {
     do {
         const uint8_t digit = number % base;
         number /= base;
-        result[--i] = (digit < 10) ? (char)(digit + UINT8_C('0')) : (char)(digit + (UINT8_C('A') - 10));
+        result[--i] = (digit < 10) ? (char)(digit + ZERO) : (char)(digit + (UPPERCASE_A - 10));
     } while (number > 0 && i > 0);
 
     if (base == 16 && i >= 2) {
@@ -320,7 +323,7 @@ static void append_keycode(uint16_t keycode) {
             // Letters A-Z.
             case KC_A ... KC_Z:
                 append_P(PSTR("KC_"));
-                append_char((char)(keycode + (UINT8_C('A') - KC_A)));
+                append_char((char)(keycode + (UPPERCASE_A - KC_A)));
                 return;
 
             // Digits 0-9 (NOTE: Unlike the ASCII order, KC_0 comes *after* KC_9.)
