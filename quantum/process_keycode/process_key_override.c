@@ -176,8 +176,7 @@ const key_override_t *clear_active_override(const bool allow_reregister) {
 
     const uint8_t mod_free_replacement = clear_mods_from(active_override->replacement);
 
-    bool unregister_replacement = mod_free_replacement != KC_NO &&   // KC_NO is never registered
-                                  mod_free_replacement < SAFE_RANGE; // Custom keycodes are never registered
+    bool unregister_replacement = mod_free_replacement != KC_NO;   // KC_NO is never registered
 
     // Try firing the custom handler
     if (active_override->custom_action != NULL) {
